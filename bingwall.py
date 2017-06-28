@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
 import urllib, json, urllib2
-import getopt, sys, os, shutil
+import getopt, sys, os, shutil, textwrap
+from PIL import ImageFont, Image, ImageDraw
 
-from PIL import ImageFont
-from PIL import Image
-from PIL import ImageDraw
-
-import textwrap
+import WeatherPrinter
 
 '''
 Check if internet is on
