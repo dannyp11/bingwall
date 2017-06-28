@@ -22,4 +22,5 @@ As of June 2017 Microsoft doesn't provide official API to get its gorgeous image
 
 ## Sample output
 
-![Alt text](https://raw.githubusercontent.com/dannyp11/bingwall/master/img/sample1.jpg?raw=true "sample1")
+![Alt text](https://raw.githubusercontent.com/dannyp11/bingwall/master/img/sample2.jpg?raw=true "With caption")
+![Alt text](https://raw.githubusercontent.com/dannyp11/bingwall/master/img/sample1.jpg?raw=true "With caption & description")
