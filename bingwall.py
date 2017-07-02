@@ -157,7 +157,7 @@ return    0  on success
           -2 on invalid zipcode
           -3 on fail getting weather info
 '''
-def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath):    
+def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):    
     # invalid api key
     if (os.path.isfile(apiKeyPath) == False):
         return "Error " + apiKeyPath + " not found"
@@ -172,7 +172,7 @@ def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath):
     if (weatherCity.mParseCode != 0):
         return "Error parsing weather info"
     
-    return weatherCity.addWeatherToPhoto(photoPath, 1500, 200, 40, fontPath)        
+    return weatherCity.addWeatherToPhoto(photoPath, x, y, 40, fontPath)        
 
 imgPath = '/tmp/image.jpg'
 fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
@@ -184,7 +184,9 @@ def usage():
     print "    -d                add description to image" 
     print "    -f {fontPath}     path to text font for caption & description. This will also trigger -c, default " + fontPath
     print "    -w {zipcode}      turn on weather feature, must also use -k option"
-    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w"    
+    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w"
+    print "    -x {top left x}   topleft x pixel of weather info (optional)"
+    print "    -y {top left y}   topleft y pixel of weather info (optional)"    
 
 def main():    
     
@@ -196,9 +198,11 @@ def main():
     addCaption = 0
     addDescription = 0   
     addWeather = 0
+    weatherX = -1
+    weatherY = -1
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:', ['path=','help'])
+        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:x:y:', ['path=','help'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -225,6 +229,10 @@ def main():
             apiKeyPath = arg
         elif opt in ('-w'):
             weatherZipcode = arg
+        elif opt in ('-x'):
+            weatherX = int(arg)
+        elif opt in ('-y'):
+            weatherY = int(arg)
             
     # check internet
     if (isInternetOn() == False):
@@ -275,7 +283,10 @@ def main():
     
     # add weather info
     if (result == 0 and addWeather == 1):
-        result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
+        if (weatherX >= 0 and weatherY >= 0):
+            result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
+        else:
+            result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
     
     if (result == 0):
         print "Successfully saved " + imgPath
