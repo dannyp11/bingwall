@@ -15,7 +15,7 @@ def isInternetOn():
     try:
         urllib2.urlopen(googleUrl, timeout=1)
         return True
-    except urllib2.URLError as err: 
+    except urllib2.URLError: 
         return False
 
 '''
@@ -143,26 +143,62 @@ def CaptionAdder(inputImg, outputImg, fontPath, text, description = 0):
     
     return result
 
+'''
+Print weather info with zipcode 
+Requires api key from openweathermap.org
+
+zipcode    - city zipcode
+apiKeyPath - path to api key
+photoPath  - path to photo that needs weather info printed on
+fontPath   - path to font file
+
+return    0  on success
+          -1 on invalid key
+          -2 on invalid zipcode
+          -3 on fail getting weather info
+'''
+def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath):    
+    # invalid api key
+    if (os.path.isfile(apiKeyPath) == False):
+        return "Error " + apiKeyPath + " not found"
+    
+    # invalid zipcode, quick n dirty check
+    if (int(zipcode) < 501 or int(zipcode) > 99950):
+        return "Error " + str(zipcode) + " is invalid zipcode"
+    
+    # create weather printer object
+    weatherCity = WeatherPrinter.WeatherCity(zipcode)
+    
+    if (weatherCity.mParseCode != 0):
+        return "Error parsing weather info"
+    
+    return weatherCity.addWeatherToPhoto(photoPath, 1500, 200, 40, fontPath)        
+
 imgPath = '/tmp/image.jpg'
 fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 addDescription = 0
 def usage():
     print "Usage: python " + (sys.argv[0]) + " OPTION [VALUE]"
-    print "    -p    where to save the image, default " + imgPath
-    print "    -c    add caption to image" 
-    print "    -d    add description to image" 
-    print "    -f    path to text font for caption & description. This will also trigger -c, default " + fontPath    
+    print "    -p {path}         where to save the image, default " + imgPath
+    print "    -c                add caption to image" 
+    print "    -d                add description to image" 
+    print "    -f {fontPath}     path to text font for caption & description. This will also trigger -c, default " + fontPath
+    print "    -w {zipcode}      turn on weather feature, must also use -k option"
+    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w"    
 
 def main():    
     
     result = 0
+    apiKeyPath = 0
+    weatherZipcode = 0
     imgPath = '/tmp/image.jpg'
     fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
     addCaption = 0
     addDescription = 0   
+    addWeather = 0
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:', ['path=','help'])
+        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:', ['path=','help'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -185,11 +221,19 @@ def main():
             addDescription = 1
         elif opt in ('-c'):
             addCaption = 1
-    
+        elif opt in ('-k'):
+            apiKeyPath = arg
+        elif opt in ('-w'):
+            weatherZipcode = arg
+            
     # check internet
     if (isInternetOn() == False):
         print "Internet is off"
         return 1
+    
+    # check if weather option is chosen
+    if (apiKeyPath != 0 and weatherZipcode > 0):
+        addWeather = 1
     
     # download image
     url = "http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
@@ -228,6 +272,10 @@ def main():
             # rm input, change output as input name
             os.remove(inputImg)
             shutil.move(outputImg, inputImg)                                        
+    
+    # add weather info
+    if (result == 0 and addWeather == 1):
+        result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
     
     if (result == 0):
         print "Successfully saved " + imgPath
