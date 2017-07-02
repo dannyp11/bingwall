@@ -46,13 +46,22 @@ class WeatherCity:
         self.mZipcode = zipcode
 
         if (self.mApiKey == -1 or self._isInternetOn() == False):
-            print "Error creating WeatherCity object for " + str(zipcode)
+            print "Error creating WeatherCity object for " + str(zipcode) + ":",
+            if (self.mApiKey == -1):
+                print "invalid apikey file " + keyFile
+            else:
+                print " no internet connection"
             return
         
         # build api call
         apiUrl = "http://api.openweathermap.org/data/2.5/weather?zip=" + str(zipcode)  +  ",us&units=metric&appid=" + self.mApiKey
+        print "weather url " + apiUrl
+        
         apiResponse = urllib2.urlopen(apiUrl)
-        resultJson = json.loads(apiResponse.read())        
+        resultJson = json.loads(apiResponse.read())
+        # for debug purpose
+        print json.dumps(resultJson, indent=4, sort_keys=True)
+                
         if (0 != self.parseWeatherJson(resultJson)):
             print "Error parsing WeatherCity object for " + str(zipcode)
             return

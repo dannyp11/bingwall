@@ -167,7 +167,7 @@ def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
         return "Error " + str(zipcode) + " is invalid zipcode"
     
     # create weather printer object
-    weatherCity = WeatherPrinter.WeatherCity(zipcode)
+    weatherCity = WeatherPrinter.WeatherCity(zipcode, apiKeyPath)
     
     if (weatherCity.mParseCode != 0):
         return "Error parsing weather info"
@@ -250,6 +250,8 @@ def main():
     imgLink = "http://bing.com" +  data["images"][0]["url"] 
     descriptionLink = data["images"][0]["copyrightlink"]
     captionText = data["images"][0]["copyright"]
+    # for debug purpose
+    print json.dumps(data, indent=4, sort_keys=True)
     
     try:
         urllib2.urlopen(imgLink)
