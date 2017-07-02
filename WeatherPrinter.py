@@ -149,6 +149,65 @@ class WeatherCity:
         
         return photoImage, iconW + x, iconH + y
         
+    '''
+    Print all text data to photo
+    
+    return    retVal = 0 if success
+            resX, resY : x ,y of bottom right pixel of text box, useful for calculating background box
+    '''
+    def _printAllText(self, draw, img, (x,y), photoPath, fontSize = 30, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
+        
+        curTempFontSize = fontSize
+        otherTempFontSize = fontSize / 2
+        
+        _column1 = x # city name, rain/snow...
+        _column2 = _column1 + 100 # icon, temp
+        
+        # open image & setup font
+        fontCurTemp = ImageFont.truetype(fontPath, curTempFontSize)
+        fontCityName = ImageFont.truetype(fontPath, curTempFontSize)
+        fontOther = ImageFont.truetype(fontPath, otherTempFontSize)                
+        
+        # print column 1
+        col1MaxX = _column1
+        
+        #  print city name
+        draw, resX, resY = self._drawText(self.mCityName, fontCityName, draw, _column1, y)
+        if (col1MaxX < resX) : col1MaxX = resX
+                 
+        #  print weather description
+        draw, resX, resY = self._drawText(self.mWeatherDescription.capitalize(), fontOther, draw, _column1, resY + 20)
+        if (col1MaxX < resX) : col1MaxX = resX
+        
+        #  print sunrise
+        draw, resX, resY = self._drawText('Sunrise ' + self.mSunRise, fontOther, draw, _column1, resY + 10) 
+        if (col1MaxX < resX) : col1MaxX = resX
+        
+        #  print sunset
+        draw, resX, resY = self._drawText('Sunset  ' + self.mSunSet, fontOther, draw, _column1, resY + 10) 
+        if (col1MaxX < resX) : col1MaxX = resX
+        
+        # print column 2
+        if (_column2 < col1MaxX + 50): _column2 = col1MaxX + 50
+        
+        #  print cur temp         
+        draw, resX, resY = self._drawText(str(self.mCurTemp) + u'\N{DEGREE SIGN}' + 'C', fontCurTemp, draw, _column2, y)
+        
+        #  paste weather icon
+        img, resX, iconY = self._pasteWeatherIcon(photoPath, img, _column2, resY + 20)
+                 
+        #  print min/max temp
+        minMaxTempTxt = str(self.mMinTemp) + '/' + str(self.mMaxTemp)          
+        draw, resX, resY = self._drawText( minMaxTempTxt, fontOther, draw, resX + 5, resY + 20)
+        
+        #  print humid
+        draw, resX, resY = self._drawText( "Humid " + str(self.mHumid) + '%', fontOther, draw, _column2, resY + 10)
+        
+        #  print wind
+        draw, resX, resY = self._drawText( "Wind " + str(self.mWindspeed) + ' m/s', fontOther, draw, _column2, resY + 10)
+        
+        return 0, resX, resY
+        
     # parse to class member given json response of api    
     def parseWeatherJson(self, jsonString):
         self.mCityName = jsonString['name']
@@ -209,56 +268,23 @@ class WeatherCity:
         if (os.path.isfile(photoPath) == False or os.path.isfile(fontPath) == False):
             return -2
         
-        curTempFontSize = fontSize
-        otherTempFontSize = fontSize / 2
+        # load image
+        img = Image.open(photoPath).convert("RGBA")
+        draw = ImageDraw.Draw(img)                 
         
-        _column1 = x # city name, rain/snow...
-        _column2 = _column1 + 100 # icon, temp
+        # draw text
+        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, fontPath)
         
-        # open image & setup font
-        fontCurTemp = ImageFont.truetype(fontPath, curTempFontSize)
-        fontCityName = ImageFont.truetype(fontPath, curTempFontSize)
-        fontOther = ImageFont.truetype(fontPath, otherTempFontSize)
-        img = Image.open(photoPath)
-        draw = ImageDraw.Draw(img)                         
+        # reload image to get rid of text
+        img = Image.open(photoPath).convert("RGBA")
+        draw = ImageDraw.Draw(img)
+                
+        # add background box
+        rectDraw = Image.new('RGBA', (resX - x + 20, resY - y + 10), (0,0,0,100))
+        img.paste(rectDraw, (x - 10, y), rectDraw)
         
-        # print column 1
-        col1MaxX = _column1
-        
-        #  print city name
-        draw, resX, resY = self._drawText(self.mCityName, fontCityName, draw, _column1, y)
-        if (col1MaxX < resX) : col1MaxX = resX
-                 
-        #  print weather description
-        draw, resX, resY = self._drawText(self.mWeatherDescription.capitalize(), fontOther, draw, _column1, resY + 20)
-        if (col1MaxX < resX) : col1MaxX = resX
-        
-        #  print sunrise
-        draw, resX, resY = self._drawText('Sunrise ' + self.mSunRise, fontOther, draw, _column1, resY + 10) 
-        if (col1MaxX < resX) : col1MaxX = resX
-        
-        #  print sunset
-        draw, resX, resY = self._drawText('Sunset  ' + self.mSunSet, fontOther, draw, _column1, resY + 10) 
-        if (col1MaxX < resX) : col1MaxX = resX
-        
-        # print column 2
-        if (_column2 < col1MaxX + 50): _column2 = col1MaxX + 50
-        
-        #  print cur temp         
-        draw, resX, resY = self._drawText(str(self.mCurTemp) + u'\N{DEGREE SIGN}' + 'C', fontCurTemp, draw, _column2, y)
-        
-        #  paste weather icon
-        img, resX, iconY = self._pasteWeatherIcon(photoPath, img, _column2, resY + 20)
-                 
-        #  print min/max temp
-        minMaxTempTxt = str(self.mMinTemp) + '/' + str(self.mMaxTemp)          
-        draw, resX, resY = self._drawText( minMaxTempTxt, fontOther, draw, resX + 5, resY + 20)
-        
-        #  print humid
-        draw, resX, resY = self._drawText( "Humid " + str(self.mHumid) + '%', fontOther, draw, _column2, resY + 10)
-        
-        #  print wind
-        draw, resX, resY = self._drawText( "Wind " + str(self.mWindspeed) + ' m/s', fontOther, draw, _column2, resY + 10)
+        # redraw text
+        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, fontPath)        
         
         # save result img
         img.save(photoPath)
