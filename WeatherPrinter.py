@@ -186,6 +186,7 @@ class WeatherCity:
         #  print sunset
         draw, resX, resY = self._drawText('Sunset  ' + self.mSunSet, fontOther, draw, _column1, resY + 10) 
         if (col1MaxX < resX) : col1MaxX = resX
+        maxY = resY # track max of Y compared to column 2
         
         # print column 2
         if (_column2 < col1MaxX + 50): _column2 = col1MaxX + 50
@@ -206,7 +207,10 @@ class WeatherCity:
         #  print wind
         draw, resX, resY = self._drawText( "Wind " + str(self.mWindspeed) + ' m/s', fontOther, draw, _column2, resY + 10)
         
-        return 0, resX, resY
+        if (resY > maxY):
+            maxY = resY
+        
+        return 0, resX, maxY
         
     # parse to class member given json response of api    
     def parseWeatherJson(self, jsonString):
@@ -280,7 +284,7 @@ class WeatherCity:
         draw = ImageDraw.Draw(img)
                 
         # add background box
-        rectDraw = Image.new('RGBA', (resX - x + 20, resY - y + 10), (0,0,0,100))
+        rectDraw = Image.new('RGBA', (resX - x + 20, resY - y + 20), (0,0,0,100))
         img.paste(rectDraw, (x - 10, y), rectDraw)
         
         # redraw text
