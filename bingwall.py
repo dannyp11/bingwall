@@ -68,18 +68,36 @@ def GetImgDescription(url, title):
     if (result != 0):
         return result    
     
-    data = webpage.read()
-    data = data.decode('utf-8')
+    dataRaw = webpage.read()
+    data = dataRaw.decode('utf-8')
     
     # query caption to find description
     query_start = "<h2 class=\"\">" + caption + "</h2></div><div>"
+    query_start2 = "</h2></div><div>" # backup if query_start return invalid
     query_stop = "</div>"
-    
+
+    print query_start
+
     found = data.find(query_start)
     index_start = found + len(query_start)
     index_stop = data.find(query_stop, index_start)
-    
-    description = data[index_start: index_stop]
+
+    # 2nd try
+    if (index_stop > index_start + 10000):
+        found = data.find(query_start2)
+        index_start = found + len(query_start2)
+        index_stop = data.find(query_stop, index_start)
+
+    # check if we still get garbage
+    if (index_stop > index_start + 10000):
+        description = ''
+    else:
+        description = data[index_start: index_stop]
+
+    # save data for debugging
+    dataFile = open('/tmp/data.bing','w')
+    dataFile.write(dataRaw)
+    dataFile.close()
 
     return result, description
 
