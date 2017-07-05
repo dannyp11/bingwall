@@ -176,7 +176,7 @@ def CaptionAdder(inputImg, outputImg, fontPath, text, description = 0):
     imgW, imgH = img.size
     
     # draw background box
-    rectDraw = Image.new('RGBA', (imgW, y_text), (0,0,0,30))
+    rectDraw = Image.new('RGBA', (imgW, y_text), (0,0,0,80))
     img.paste(rectDraw, (0, imgH - y_text), rectDraw)    
     
     # draw text again
