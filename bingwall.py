@@ -102,17 +102,10 @@ def GetImgDescription(url, title):
     return result, description
 
 '''
-Add caption to image
-
-inputImg : path to input
-outputImg: path to output
-fontPath : path to dejavu font
-description: optional description to print
+Print caption and description on image
+return image, text_height in pixel
 '''
-def CaptionAdder(inputImg, outputImg, fontPath, text, description = 0):    
-    
-    result = 0
-    
+def _printCaptionText(image, fontPath, text, description = 0):
     # format text
     fontSize = 20
     fontSizeDescription = fontSize - 2;
@@ -120,7 +113,7 @@ def CaptionAdder(inputImg, outputImg, fontPath, text, description = 0):
     # open input
     font = ImageFont.truetype(fontPath, fontSize)
     fontDescription = ImageFont.truetype(fontPath, fontSizeDescription)
-    img = Image.open(inputImg)
+    img = image
     imgW, imgH = img.size
     draw = ImageDraw.Draw(img)    
     
@@ -150,11 +143,44 @@ def CaptionAdder(inputImg, outputImg, fontPath, text, description = 0):
         y_text = fontSize + 5
     
     # draw caption
+    height = -1
     for line in reversed(caption_lines):
         txtW, txtH = draw.textsize(line, font) # get text size on draw
         width, height = font.getsize(line) # get 1 character size
         draw = DrawText(line, font, draw, imgW - txtW - 5, imgH - y_text)
-        y_text += height    
+        y_text += height
+    y_text -= height
+    
+    return img, y_text
+
+'''
+Add caption to image
+
+inputImg : path to input
+outputImg: path to output
+fontPath : path to dejavu font
+description: optional description to print
+'''
+def CaptionAdder(inputImg, outputImg, fontPath, text, description = 0):    
+    
+    result = 0
+    
+    # load image    
+    img = Image.open(inputImg)
+    
+    # draw text first
+    img, y_text = _printCaptionText(img, fontPath, text, description)    
+    
+    # reload image to get rid of text
+    img = Image.open(inputImg)
+    imgW, imgH = img.size
+    
+    # draw background box
+    rectDraw = Image.new('RGBA', (imgW, y_text), (0,0,0,30))
+    img.paste(rectDraw, (0, imgH - y_text), rectDraw)    
+    
+    # draw text again
+    img, y_text = _printCaptionText(img, fontPath, text, description)
     
     # save img
     img.save(outputImg)
