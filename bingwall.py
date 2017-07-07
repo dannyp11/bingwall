@@ -76,7 +76,7 @@ def GetImgDescription(url, title):
     query_start2 = "</h2></div><div>" # backup if query_start return invalid
     query_stop = "</div>"
 
-    print query_start
+    #print query_start
 
     found = data.find(query_start)
     index_start = found + len(query_start)
