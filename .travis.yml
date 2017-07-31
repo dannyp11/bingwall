@@ -22,6 +22,7 @@ branches:
   # whitelist
   only:
     - master
+    - devel
 
 # command to run unit tests
 script:
