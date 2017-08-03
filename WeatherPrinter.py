@@ -268,16 +268,26 @@ class WeatherCity:
         if (self.mParseCode != 0):
             return -1
         
-        # check photoPath and fontPath exists
-        if (os.path.isfile(photoPath) == False or os.path.isfile(fontPath) == False):
+        # check photoPath exists
+        if (os.path.isfile(photoPath) == False):
             return -2
+        
+        # check fontPath exists
+        newFontPath = fontPath
+        if (os.path.isfile(fontPath) == False):
+            # highly likely this is a fedora system, if so, remove the "/truetype" part
+            newFontPath.replace('/truetype','')
+            if (newFontPath == fontPath):
+                return -3
+            elif (os.path.isfile(newFontPath) == False):
+                return -4
         
         # load image
         img = Image.open(photoPath).convert("RGBA")
         draw = ImageDraw.Draw(img)                 
         
         # draw text
-        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, fontPath)
+        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, newFontPath)
         
         # reload image to get rid of text
         img = Image.open(photoPath).convert("RGBA")
@@ -288,7 +298,7 @@ class WeatherCity:
         img.paste(rectDraw, (x - 10, y), rectDraw)
         
         # redraw text
-        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, fontPath)        
+        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, newFontPath)        
         
         # save result img
         img.save(photoPath)
