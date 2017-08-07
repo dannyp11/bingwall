@@ -291,7 +291,7 @@ class WeatherCity:
         retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, fontPath)        
         
         # save result img
-        img.save(photoPath)
+        img.convert('RGB').save(photoPath)
         
         return retVal
 
@@ -310,16 +310,29 @@ class TestWeatherPrinter(unittest.TestCase):
             sys.exit(1)
 
     def test_info_success(self):        
-        chaska = WeatherCity(55318)
+        losAngeles = WeatherCity(90010)
         lagunaHills = WeatherCity(92653)
-        self.assertEqual(chaska.mParseCode, 0)
+        self.assertEqual(losAngeles.mParseCode, 0)
         self.assertEqual(lagunaHills.mParseCode, 0)
         
-        self.assertEqual(chaska.mCityName, 'Chaska')
-        self.assertEqual(lagunaHills.mCityName, 'Laguna Hills')
+        self.assertEqual(losAngeles.mCityName, 'Los Angeles')
+        self.assertEqual(lagunaHills.mCityName, 'Laguna Hills')        
         
-    # require Internet on
-    def test_print_picture(self):
+    # this doesn't require bingwall
+    def test_print_blankpicture(self):
+        # create test image
+        testImage = 'image2.jpg'
+        img = Image.new('RGB', (1920, 1080), "white")
+        img.save(testImage)
+        
+        # get test weather info
+        losAngeles = WeatherCity(90010)
+        self.assertEqual(losAngeles.mParseCode, 0)
+        self.assertEqual(losAngeles.addWeatherToPhoto(testImage, fontSize=50), 0)
+    
+    # comprehensive test, requires functional bingwall
+    # the reason for this is that I can't test bingwall directly, so this is more like integration test
+    def test_print_picture_withbingwall(self):
         testImage = 'image.jpg'        
         bingwallFile = 'bingwall.py'
         
@@ -328,10 +341,9 @@ class TestWeatherPrinter(unittest.TestCase):
         self.assertEqual(downloadSuccess, 0)
         
         # print weather info
-        chaska  = WeatherCity(55318)
-        self.assertEqual(chaska.addWeatherToPhoto(testImage, fontSize=50), 0)
+        losAngeles  = WeatherCity(90010)
+        self.assertEqual(losAngeles.addWeatherToPhoto(testImage, fontSize=50), 0)
         print "Check out weather info in " + testImage
-        
-        
+    
 if __name__ == '__main__':
     unittest.main()
