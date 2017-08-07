@@ -273,14 +273,11 @@ class WeatherCity:
             return -2
         
         # check fontPath exists
-        newFontPath = fontPath
+        newFontPath = fontPath.replace('/truetype','')
         if (os.path.isfile(fontPath) == False):
             # highly likely this is a fedora system, if so, remove the "/truetype" part
-            newFontPath.replace('/truetype','')
-            if (newFontPath == fontPath):
+            if (os.path.isfile(newFontPath) == False):
                 return -3
-            elif (os.path.isfile(newFontPath) == False):
-                return -4
         
         # load image
         img = Image.open(photoPath).convert("RGBA")
