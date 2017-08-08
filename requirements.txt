@@ -1,2 +1,6 @@
-BeautifulSoup==3.2.1
-Pillow==2.3.0
+adium-theme-ubuntu==0.3.4
+meld==3.14.2
+olefile==0.44
+Pillow==4.2.1
+pygobject==3.20.0
+unity-lens-photos==1.0
