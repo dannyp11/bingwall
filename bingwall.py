@@ -68,7 +68,7 @@ def main():
     apiKeyPath = 0
     weatherZipcode = 0
     imgPath = '/tmp/image.jpg'
-    fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+    fontPath = 'DejaVuSans.ttf'
     addCaption = 0
     addDescription = 0   
     addWeather = 0
@@ -88,13 +88,7 @@ def main():
         elif opt in ('-p', '--path='):
             imgPath = arg
         elif opt in ('-f'):
-            addCaption = 1
-            fontPath = arg
-            
-            # check if fontPath exists
-            if (os.path.isfile(fontPath)):
-                addCaption = 1
-                
+            fontPath = arg                            
         elif opt in ('-d'):
             addDescription = 1
         elif opt in ('-c'):

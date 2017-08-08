@@ -22,7 +22,7 @@ class BingWallpaper(object):
 
 
     def __init__(self, imgPath = "/tmp/image.jpg", 
-                 fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
+                 fontPath = 'DejaVuSans.ttf'):
         '''
         Constructor
         '''

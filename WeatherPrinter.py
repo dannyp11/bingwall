@@ -24,24 +24,24 @@ def getApiKey(fileName = 'api.key'):
         return -1
 
 class WeatherCity:
-    '''
-    All temps are in C
-    '''
-    mParseCode = -1
-    mApiKey = -1
-    mCityName = 0
-    mZipcode = 12345
-    mMaxTemp = -300
-    mCurTemp = -300
-    mMinTemp = -300
-    mIconUrl = 0 # url for weather icon
-    mWeatherDescription = 0
-    mSunRise = -1
-    mSunSet = -1
-    mHumid = -1
-    mWindspeed = -1
-    
     def __init__(self, zipcode, keyFile = 'api.key'):
+        '''
+        All temps are in C
+        '''
+        self.mParseCode = -1
+        self.mApiKey = -1
+        self.mCityName = 0
+        self.mZipcode = 12345
+        self.mMaxTemp = -300
+        self.mCurTemp = -300
+        self.mMinTemp = -300
+        self.mIconUrl = 0 # url for weather icon
+        self.mWeatherDescription = 0
+        self.mSunRise = -1
+        self.mSunSet = -1
+        self.mHumid = -1
+        self.mWindspeed = -1
+        
         self.mApiKey = getApiKey(keyFile)
         self.mZipcode = zipcode
 
@@ -237,21 +237,21 @@ class WeatherCity:
     return 0 if passed
     '''
     def sanityCheck(self):
-        isGood = True        
-        isGood &= (self.mCurTemp > -50) & (self.mCurTemp < 50)
-        isGood &= (self.mMaxTemp > -50) & (self.mMaxTemp < 50)
-        isGood &= (self.mMinTemp > -50) & (self.mMinTemp < 50)
-        isGood &= (self.mHumid >= 0) & (self.mWindspeed >= 0)
-        isGood &= (len(self.mSunRise) == 5) & (len(self.mSunSet) == 5)
+        isGood = 0        
+        isGood += (self.mCurTemp > -50) & (self.mCurTemp < 50)
+        isGood += 2*(self.mMaxTemp > -50) & (self.mMaxTemp < 50)
+        isGood += 4*(self.mMinTemp > -50) & (self.mMinTemp < 50)
+        isGood += 8*(self.mHumid >= 0) & (self.mWindspeed >= 0)
+        isGood += 16*(len(self.mSunRise) == 5) & (len(self.mSunSet) == 5)
         
         # check if icon url is alive        
         try:
             urllib2.urlopen(self.mIconUrl)
         except Exception:
-            isGood = False
+            isGood += 32
         
-        self.mParseCode = not isGood        
-        return (not isGood)
+        self.mParseCode = isGood        
+        return isGood
     
     '''
     Main function of this class
@@ -261,7 +261,7 @@ class WeatherCity:
     
     return 0 if success 
     '''
-    def addWeatherToPhoto(self, photoPath, x = 540, y = 10, fontSize = 30, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
+    def addWeatherToPhoto(self, photoPath, x = 540, y = 10, fontSize = 30, fontPath = 'DejaVuSans.ttf'):
         retVal = 0
         
         # prevent going further
@@ -273,18 +273,18 @@ class WeatherCity:
             return -2
         
         # check fontPath exists
-        newFontPath = fontPath.replace('/truetype','')
-        if (os.path.isfile(fontPath) == False):
-            # highly likely this is a fedora system, if so, remove the "/truetype" part
-            if (os.path.isfile(newFontPath) == False):
-                return -3
-        
+#         newFontPath = fontPath.replace('/truetype','')
+#         if (os.path.isfile(fontPath) == False):
+#             # highly likely this is a fedora system, if so, remove the "/truetype" part
+#             if (os.path.isfile(newFontPath) == False):
+#                 return -3
+#         
         # load image
         img = Image.open(photoPath).convert("RGBA")
         draw = ImageDraw.Draw(img)                 
         
         # draw text
-        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, newFontPath)
+        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, fontPath)
         
         # reload image to get rid of text
         img = Image.open(photoPath).convert("RGBA")
@@ -295,7 +295,7 @@ class WeatherCity:
         img.paste(rectDraw, (x - 10, y), rectDraw)
         
         # redraw text
-        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, newFontPath)        
+        retVal, resX, resY = self._printAllText(draw, img, (x, y), photoPath, fontSize, fontPath)        
         
         # save result img
         img.convert('RGB').save(photoPath)
