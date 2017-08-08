@@ -62,8 +62,10 @@ class WeatherCity:
         # for debug purpose
         print json.dumps(resultJson, indent=4, sort_keys=True)
                 
-        if (0 != self.parseWeatherJson(resultJson)):
-            print "Error parsing WeatherCity object for " + str(zipcode)
+        parseResult = self.parseWeatherJson(resultJson)
+        if (0 != parseResult):
+            print "Error parsing WeatherCity object for " + str(zipcode) + " code " + str(parseResult)
+            self._dumpInfo()
             return
         
     '''
@@ -212,6 +214,15 @@ class WeatherCity:
         
         return 0, resX, maxY
         
+    # dump object data
+    def _dumpInfo(self):
+        print 'City: ' + self.mCityName
+        print 'Temp: ' + str(self.mMinTemp) + '/' + str(self.mCurTemp) + '/' + str(self.mMaxTemp)
+        print 'Humid: ' + str(self.mHumid)
+        print 'Desc: ' + self.mWeatherDescription
+        print 'Sunrise: ' + self.mSunRise
+        print 'Sunset: ' + self.mSunSet
+        
     # parse to class member given json response of api    
     def parseWeatherJson(self, jsonString):
         self.mCityName = jsonString['name']
@@ -230,19 +241,19 @@ class WeatherCity:
         
         self.mWindspeed = jsonString['wind']['speed']
         
-        return self.sanityCheck()
+        return self._sanityCheck()
 
     '''
     Check if member data makes sense such as feasible temp, alive url
     return 0 if passed
     '''
-    def sanityCheck(self):
-        isGood = 0        
-        isGood += (self.mCurTemp > -50) & (self.mCurTemp < 50)
-        isGood += 2*(self.mMaxTemp > -50) & (self.mMaxTemp < 50)
-        isGood += 4*(self.mMinTemp > -50) & (self.mMinTemp < 50)
-        isGood += 8*(self.mHumid >= 0) & (self.mWindspeed >= 0)
-        isGood += 16*(len(self.mSunRise) == 5) & (len(self.mSunSet) == 5)
+    def _sanityCheck(self):
+        isGood = 31        
+        isGood -= 1*(self.mCurTemp > -50) & (self.mCurTemp < 50)
+        isGood -= 2*((self.mMaxTemp > -50) & (self.mMaxTemp < 50))
+        isGood -= 4*((self.mMinTemp > -50) & (self.mMinTemp < 50))
+        isGood -= 8*((self.mHumid >= 0) & (self.mWindspeed >= 0))
+        isGood -= 16*((len(self.mSunRise) == 5) & (len(self.mSunSet) == 5))
         
         # check if icon url is alive        
         try:
