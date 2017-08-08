@@ -27,3 +27,5 @@ branches:
 # command to run unit tests
 script:
 - python WeatherPrinter.py
+- python WallpaperDownloader.py
+- python bingwall.py -cd -p testImg.jpg -w 90010 -k api.key

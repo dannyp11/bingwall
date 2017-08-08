@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-import urllib, json, urllib2
-import getopt, sys, os, shutil, textwrap
-from PIL import ImageFont, Image, ImageDraw
+import urllib2
+import getopt, sys, os, shutil
 
-import WeatherPrinter
+import WeatherPrinter, WallpaperDownloader
 
 '''
 Check if internet is on
@@ -17,175 +16,6 @@ def isInternetOn():
         return True
     except urllib2.URLError: 
         return False
-
-'''
-Draw white text with black outline
-
-text - input
-font - font
-draw - draw object
-x, y - upperleft position of text
-fillcolor - color of text, default: white
-'''
-def DrawText(text, font, draw, x , y, fillColor = (255, 255, 255, 255)):
-    shadowcolor = (0,0,0,255)
-    
-    # thicker border, draw stroke
-    draw.text((x-1, y-1), text, font=font, fill=shadowcolor)
-    draw.text((x+1, y+1), text, font=font, fill=shadowcolor)
-    draw.text((x+1, y-1), text, font=font, fill=shadowcolor)
-    draw.text((x-1, y+1), text, font=font, fill=shadowcolor)
-    
-    # now draw the text over it
-    draw.text((x, y), text, font=font, fill=fillColor)
-    
-    return draw
-
-'''
-Get description of image given bing link and image title
-
-url    : description link
-title  : image title
-'''
-def GetImgDescription(url, title):
-    
-    result = 0
-    
-    # strip title out of copyright portion
-    strDelimiter = " ("
-    caption_index = title.find(strDelimiter)    
-    caption =  title[0:caption_index]
-    
-    # load url
-    webpage = ""
-    try:
-        webpage = urllib2.urlopen(url)
-    except urllib2.HTTPError:
-        result = 1
-    except urllib2.URLError:
-        result = 1
-    
-    if (result != 0):
-        return result    
-    
-    dataRaw = webpage.read()
-    data = dataRaw.decode('utf-8')
-    
-    # query caption to find description
-    query_start = "<h2 class=\"\">" + caption + "</h2></div><div>"
-    query_start2 = "</h2></div><div>" # backup if query_start return invalid
-    query_stop = "</div>"
-
-    #print query_start
-
-    found = data.find(query_start)
-    index_start = found + len(query_start)
-    index_stop = data.find(query_stop, index_start)
-
-    # 2nd try
-    if (index_stop > index_start + 10000):
-        found = data.find(query_start2)
-        index_start = found + len(query_start2)
-        index_stop = data.find(query_stop, index_start)
-
-    # check if we still get garbage
-    if (index_stop > index_start + 10000):
-        description = ''
-    else:
-        description = data[index_start: index_stop]
-
-    # save data for debugging
-    dataFile = open('/tmp/data.bing','w')
-    dataFile.write(dataRaw)
-    dataFile.close()
-
-    return result, description
-
-'''
-Print caption and description on image
-return image, text_height in pixel
-'''
-def _printCaptionText(image, fontPath, text, description = 0):
-    # format text
-    fontSize = 20
-    fontSizeDescription = fontSize - 2;
-        
-    # open input
-    font = ImageFont.truetype(fontPath, fontSize)
-    fontDescription = ImageFont.truetype(fontPath, fontSizeDescription)
-    img = image
-    imgW, imgH = img.size
-    draw = ImageDraw.Draw(img)    
-    
-    # determine text box size
-    charLimiter = 50
-    strDelimiter = "("
-    
-    caption_lines = text.split(strDelimiter)
-    caption_lines[-1] = "(" + caption_lines[-1]            
-    
-    description_lines = 0
-    
-    # draw description
-    if (description != 0):
-        description_lines = textwrap.wrap(description, charLimiter * 3)
-    
-    y_text = fontSizeDescription + 5    
-    if (description_lines != 0):
-        for line in reversed(description_lines):
-            txtW, txtH = draw.textsize(line, fontDescription) # get text size on draw
-            width, height = fontDescription.getsize(line) # get 1 character size
-            draw = DrawText(line, fontDescription, draw, imgW - txtW - 5, imgH - y_text)
-            y_text += txtH + 2
-            
-        y_text += 5    
-    else:
-        y_text = fontSize + 5
-    
-    # draw caption
-    height = -1
-    for line in reversed(caption_lines):
-        txtW, txtH = draw.textsize(line, font) # get text size on draw
-        width, height = font.getsize(line) # get 1 character size
-        draw = DrawText(line, font, draw, imgW - txtW - 5, imgH - y_text)
-        y_text += height
-    y_text -= height
-    
-    return img, y_text
-
-'''
-Add caption to image
-
-inputImg : path to input
-outputImg: path to output
-fontPath : path to dejavu font
-description: optional description to print
-'''
-def CaptionAdder(inputImg, outputImg, fontPath, text, description = 0):    
-    
-    result = 0
-    
-    # load image    
-    img = Image.open(inputImg)
-    
-    # draw text first
-    img, y_text = _printCaptionText(img, fontPath, text, description)    
-    
-    # reload image to get rid of text
-    img = Image.open(inputImg)
-    imgW, imgH = img.size
-    
-    # draw background box
-    rectDraw = Image.new('RGBA', (imgW, y_text), (0,0,0,80))
-    img.paste(rectDraw, (0, imgH - y_text), rectDraw)    
-    
-    # draw text again
-    img, y_text = _printCaptionText(img, fontPath, text, description)
-    
-    # save img
-    img.save(outputImg)
-    
-    return result
 
 '''
 Print weather info with zipcode 
@@ -214,7 +44,7 @@ def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
     weatherCity = WeatherPrinter.WeatherCity(zipcode, apiKeyPath)
     
     if (weatherCity.mParseCode != 0):
-        return "Error parsing weather info"
+        return "Error code " + str(weatherCity.mParseCode) + " parsing weather info"
     
     return weatherCity.addWeatherToPhoto(photoPath, x, y, 40, fontPath)        
 
@@ -287,45 +117,34 @@ def main():
     if (apiKeyPath != 0 and weatherZipcode > 0):
         addWeather = 1
     
-    # download image
-    url = "http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
-    response = urllib.urlopen(url)
-    data = json.loads(response.read())
-    imgLink = "http://bing.com" +  data["images"][0]["url"] 
-    descriptionLink = data["images"][0]["copyrightlink"]
-    captionText = data["images"][0]["copyright"]
-    # for debug purpose
-    print json.dumps(data, indent=4, sort_keys=True)
-    
-    try:
-        urllib2.urlopen(imgLink)
-    except urllib2.HTTPError:
-        result = 1
-    except urllib2.URLError:
-        result = 1
-    
-    if result == 0:
-        urllib.urlretrieve(imgLink, imgPath)
-    
-    # result
-    if (os.path.isfile(imgPath) == 0):
-        result = 1            
+    # build wallpaperDownloader object
+    wallpaper = WallpaperDownloader.BingWallpaper(imgPath, fontPath)
+    if (0 != wallpaper.dlResultCode):
+        print 'Error code ' + str(wallpaper.dlResultCode) + ' getting wallpaper' 
+        return 2
     
     # add description to image        
-    description = 0
-    if (result == 0 and addDescription == 1):        
-        result, description = GetImgDescription(descriptionLink, captionText)
+    if (addDescription == 1):        
+        resultDesc = wallpaper.ParseDescription()
+        if (0 != resultDesc):
+            print 'Error code ' + str(resultDesc) + ' parsing description'
     
     # add caption to image
-    if (result == 0 and addCaption == 1):
-        # default values
-        inputImg = imgPath
-        outputImg = "/tmp/bing-wall-output.jpg"  
-        
-        if (CaptionAdder(inputImg, outputImg, fontPath, captionText, description) == 0):
-            # rm input, change output as input name
-            os.remove(inputImg)
-            shutil.move(outputImg, inputImg)                                        
+    if (addCaption == 1):
+        result = wallpaper.ParseCaption()
+        if (0 != result):
+            print 'Error code ' + str(resultDesc) + ' parsing caption'
+            # we return because caption is a must-ok for bing image
+            return result
+    
+    inputImg = imgPath
+    outputImg = "/tmp/bing-wall-output.jpg"  
+    
+    # now we can export caption & description to image
+    if (wallpaper.ExportImage(outputImg) == 0):
+        # rm input, change output as input name
+        os.remove(inputImg)
+        shutil.move(outputImg, inputImg)                                        
     
     # add weather info
     if (result == 0 and addWeather == 1):
