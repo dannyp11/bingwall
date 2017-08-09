@@ -1,7 +1,7 @@
 # bingwall
 unoffical Bing's Photo of the Day fetcher with nice caption adder and more 
 
-[![Build Status](https://travis-ci.org/dannyp11/bingwall.svg?branch=devel)](https://travis-ci.org/dannyp11/bingwall)
+[![Build Status](https://travis-ci.org/dannyp11/bingwall.svg?branch=master)](https://travis-ci.org/dannyp11/bingwall)
 
 ## Introduction
 As you may know there's currently a wallpaper setter called wallch which allows you to set Wikipedia's photo of the day as wallpaper. However, that tool doesn't (or at least at the time I write this readme) support Bing wallpaper. So bingwall is supposed to be filled in that gap. 
