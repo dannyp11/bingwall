@@ -138,7 +138,9 @@ def main():
     if (wallpaper.ExportImage(outputImg) == 0):
         # rm input, change output as input name
         os.remove(inputImg)
-        shutil.move(outputImg, inputImg)                                        
+        shutil.move(outputImg, inputImg)
+    else:
+        print "Error: can't export image " + str(outputImg)                                        
     
     # add weather info
     if (result == 0 and addWeather == 1):

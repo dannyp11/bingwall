@@ -4,9 +4,11 @@ Created on Aug 6, 2017
 @author: danny
 '''
 
-import os.path, sys, time
+import os.path
 import unittest, textwrap
 import urllib2, json, urllib
+from bs4 import BeautifulSoup
+import re
 
 from PIL import ImageFont, Image, ImageDraw
 
@@ -22,11 +24,11 @@ class BingWallpaper(object):
 
 
     def __init__(self, imgPath = "/tmp/image.jpg", 
-                 fontPath = 'DejaVuSans.ttf'):
+                 fontPath = 'DejavuSans.ttf'):
         '''
         Constructor
         '''
-        self.url = "http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-AU"
+        self.url = "http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
         self.captionText = ""
         self.descriptionText = ""
         self.descriptionLink = ""
@@ -106,11 +108,76 @@ class BingWallpaper(object):
         return result
     
     '''
+    ! Current version
     Get description of image given bing link and image title
     
     return: 0 on success
     '''
     def ParseDescription(self):
+        result = 0
+        self.addDescription = True
+        
+        # check if description url is valid
+        if (0 == len(self.descriptionLink)):
+            return 1
+        
+        # load url
+        webpage = ""
+        try:
+            webpage = urllib2.urlopen(self.descriptionLink)
+        except urllib2.HTTPError:
+            result = 1
+        except urllib2.URLError:
+            result = 2
+        
+        if (result != 0):
+            return result
+        
+        # convert data to bs format
+        bsData = BeautifulSoup(webpage.read().decode('utf-8'), 'lxml')
+        descSection = bsData.find('div', {'class': 'b_vPanel'})
+        if (descSection is None):
+            return 3        
+        
+        descSection = descSection.find('div')
+        if (descSection is None):
+            return 4
+        
+        # traverse thru div list
+        descSection = descSection.nextSibling
+        descSection = descSection.nextSibling
+        descSection = descSection.nextSibling
+        
+        if (len(str(descSection)) > 30):
+            self.descriptionText = str(descSection.prettify().encode('unicode-escape')).decode('unicode-escape')
+            
+            # strip xml tag
+            self.descriptionText = re.sub('<[^>]*>', '', self.descriptionText)
+            
+            if (len(self.descriptionText) < 30):
+                result = 6
+            
+        else:
+            result = 5
+            
+        # save data for debugging
+        dataFile = open('/tmp/data.bing','w')
+        dataFile.write(bsData.prettify(encoding='utf-8'))
+        dataFile.close()
+        
+        descFile = open('/tmp/descData.bing','w')
+        descFile.write(bsData.find('div', {'class': 'b_vPanel'}).prettify(encoding='utf-8'))
+        descFile.close()
+        
+        return result
+    
+    '''
+    ! Old version
+    Get description of image given bing link and image title
+    
+    return: 0 on success
+    '''
+    def ParseDescriptionV1(self):
         
         result = 0
         self.addDescription = True
@@ -293,7 +360,7 @@ class TestBingWallpaper(unittest.TestCase):
         self.assertEqual(0, wallpaper.ParseCaption())
         
     def test_comprehensive(self):
-        wallpaper = BingWallpaper(self.__class__.imgPath)
+        wallpaper = BingWallpaper('img.jpg', fontPath='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
         self.assertEqual(0, wallpaper.dlResultCode)
         self.assertEqual(0, wallpaper.ParseDescription())
         self.assertEqual(0, wallpaper.ParseCaption())
