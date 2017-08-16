@@ -79,7 +79,7 @@ def main():
     offsetPix = 0
         
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:x:y:', ['path=','help'])
+        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:x:y:o:', ['path=','help'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -142,7 +142,7 @@ def main():
     outputImg = "/tmp/bing-wall-output.jpg"  
     
     # now we can export caption & description to image
-    if (wallpaper.ExportImage(outputImg) == 0):
+    if (wallpaper.ExportImage(outputImg, offsetPix) == 0):
         # rm input, change output as input name
         os.remove(inputImg)
         shutil.move(outputImg, inputImg)
