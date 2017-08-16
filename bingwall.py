@@ -51,6 +51,7 @@ def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
 imgPath = '/tmp/image.jpg'
 fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 addDescription = 0
+offsetPix = 0
 def usage():
     print "Usage: python " + (sys.argv[0]) + " OPTION [VALUE]"
     print "    -p {path}         where to save the image, default " + imgPath
@@ -60,7 +61,8 @@ def usage():
     print "    -w {zipcode}      turn on weather feature, must also use -k option"
     print "    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w"
     print "    -x {top left x}   topleft x pixel of weather info (optional)"
-    print "    -y {top left y}   topleft y pixel of weather info (optional)"    
+    print "    -y {top left y}   topleft y pixel of weather info (optional)"
+    print "    -o {offset}       offset pixels from bottom for caption/description, default: " + str(offsetPix)
 
 def main():    
     
@@ -74,9 +76,10 @@ def main():
     addWeather = 0
     weatherX = -1
     weatherY = -1
-    
+    offsetPix = 0
+        
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:x:y:', ['path=','help'])
+        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:x:y:o:', ['path=','help'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -101,6 +104,10 @@ def main():
             weatherX = int(arg)
         elif opt in ('-y'):
             weatherY = int(arg)
+        elif opt in ('-o'):
+            offsetPix = int(arg)
+            if (offsetPix < 0):
+                offsetPix = 0
             
     # check internet
     if (isInternetOn() == False):
@@ -135,7 +142,7 @@ def main():
     outputImg = "/tmp/bing-wall-output.jpg"  
     
     # now we can export caption & description to image
-    if (wallpaper.ExportImage(outputImg) == 0):
+    if (wallpaper.ExportImage(outputImg, offsetPix) == 0):
         # rm input, change output as input name
         os.remove(inputImg)
         shutil.move(outputImg, inputImg)

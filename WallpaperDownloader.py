@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import re
 
 from PIL import ImageFont, Image, ImageDraw
+from PIL.ImageChops import offset
 
 class BingWallpaper(object):
     '''
@@ -241,7 +242,7 @@ class BingWallpaper(object):
     Print caption and description on image
     return image, text_height in pixel
     '''
-    def _printAllText(self, image):
+    def _printAllText(self, image, captionOffset = 0):
         # if draw nothing, return for best performance
         if ((False == self.addCaption or 0 == len(self.captionText)) and False == self.addDescription):
             return image, 0
@@ -265,13 +266,13 @@ class BingWallpaper(object):
         caption_lines[-1] = "(" + caption_lines[-1]            
         
         description_lines = 0
-        y_text = fontSize + 2
+        y_text = fontSize + 2 + captionOffset
         
         # draw description
         if (0 != len(self.descriptionText) and True == self.addDescription):
             description_lines = textwrap.wrap(self.descriptionText, charLimiter * 3)
         
-            y_text = fontSizeDescription + 5    
+            y_text = fontSizeDescription + 5 + captionOffset    
             if (description_lines != 0):
                 for line in reversed(description_lines):
                     txtW, txtH = draw.textsize(line, fontDescription) # get text size on draw
@@ -281,7 +282,7 @@ class BingWallpaper(object):
                     
                 y_text += 5    
             else:
-                y_text = fontSize + 5
+                y_text = fontSize + 5 + captionOffset
         
         # draw caption
         if (True == self.addCaption):
@@ -298,12 +299,10 @@ class BingWallpaper(object):
     '''
     Add caption & description to image if found
     
-    inputImg : path to input
     outputImg: path to output
-    fontPath : path to dejavu font
-    description: optional description to print
+    offsetPixels: y-offset for caption/description, useful for bottom taskbar
     '''
-    def ExportImage(self, outputImg = 0):    
+    def ExportImage(self, outputImg = 0, offsetPixels = 0):    
         
         result = 0
         
@@ -311,7 +310,7 @@ class BingWallpaper(object):
         img = Image.open(self.imgPath)
         
         # draw text first
-        img, y_text = self._printAllText(img)    
+        img, y_text = self._printAllText(img, offsetPixels)    
         
         # reload image to get rid of text
         img = Image.open(self.imgPath)
@@ -322,7 +321,7 @@ class BingWallpaper(object):
         img.paste(rectDraw, (0, imgH - y_text), rectDraw)    
         
         # draw text again
-        img, y_text = self._printAllText(img)
+        img, y_text = self._printAllText(img, offsetPixels)
         
         # save img
         if (outputImg != 0):
@@ -357,7 +356,7 @@ class TestBingWallpaper(unittest.TestCase):
         wallpaper = BingWallpaper(self.__class__.imgPath)
         self.assertEqual(0, wallpaper.dlResultCode)
         self.assertEqual(0, wallpaper.ParseDescription())
-        self.assertEqual(0, wallpaper.ParseCaption())
+        self.assertEqual(0, wallpaper.ParseCaption())    
         
     def test_comprehensive(self):
         wallpaper = BingWallpaper('img.jpg', fontPath='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
@@ -365,6 +364,13 @@ class TestBingWallpaper(unittest.TestCase):
         self.assertEqual(0, wallpaper.ParseDescription())
         self.assertEqual(0, wallpaper.ParseCaption())
         self.assertEqual(0, wallpaper.ExportImage('img2.jpg'))
+    
+    def test_comprehensiveOffset(self):
+        wallpaper = BingWallpaper(self.__class__.imgPath, fontPath='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+        self.assertEqual(0, wallpaper.dlResultCode)
+        self.assertEqual(0, wallpaper.ParseDescription())
+        self.assertEqual(0, wallpaper.ParseCaption())
+        self.assertEqual(0, wallpaper.ExportImage('img3.jpg', 100))
         
 if __name__ == '__main__':
     unittest.main()
