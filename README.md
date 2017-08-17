@@ -1,7 +1,7 @@
 # bingwall
 unoffical Bing's Photo of the Day fetcher with nice caption adder and more 
 
-[![Build Status](https://travis-ci.org/dannyp11/bingwall.svg?branch=devel)](https://travis-ci.org/dannyp11/bingwall)
+[![Build Status](https://travis-ci.org/dannyp11/bingwall.svg?branch=master)](https://travis-ci.org/dannyp11/bingwall)
 
 ## Introduction
 As you may know there's currently a wallpaper setter called wallch which allows you to set Wikipedia's photo of the day as wallpaper. However, that tool doesn't (or at least at the time I write this readme) support Bing wallpaper. So bingwall is supposed to be filled in that gap. 
@@ -16,7 +16,8 @@ As of June 2017 Microsoft doesn't provide official API to get its gorgeous image
   2. add description - done
   3. add weather (may need to register API key) - done
   4. nicer weather icon - done
-  5. what else?
+  5. offset pixels for description & caption - done
+  6. what else?
 
 
 ## Usage
@@ -31,7 +32,8 @@ Usage: python bingwall.py OPTION [VALUE]
     -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w
     -x {top left x}   topleft x pixel of weather info (optional)
     -y {top left y}   topleft y pixel of weather info (optional)
-
+    -o {offset}       offset pixels from bottom for caption/description, default: 0
+    
 ```
 
 ## Sample output
