@@ -222,6 +222,7 @@ class WeatherCity:
         print 'Desc: ' + self.mWeatherDescription
         print 'Sunrise: ' + self.mSunRise
         print 'Sunset: ' + self.mSunSet
+        print 'Weather icon url: ' + self.mIconUrl
         
     # parse to class member given json response of api    
     def parseWeatherJson(self, jsonString):
