@@ -3,7 +3,7 @@
 import urllib2
 import getopt, sys, os, shutil
 
-import WeatherPrinter, WallpaperDownloader
+import WeatherPrinter, BingWallpaperDownloader
 
 '''
 Check if internet is on
@@ -119,7 +119,7 @@ def main():
         addWeather = 1
     
     # build wallpaperDownloader object
-    wallpaper = WallpaperDownloader.BingWallpaper(imgPath, fontPath)
+    wallpaper = BingWallpaperDownloader.BingWallpaper(imgPath, fontPath)
     if (0 != wallpaper.dlResultCode):
         print 'Error code ' + str(wallpaper.dlResultCode) + ' getting wallpaper' 
         return 2
