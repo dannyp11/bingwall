@@ -12,16 +12,29 @@ This will download image, put caption & description if passed
 This class should be inherited
 '''
 class PhotoProcessor:
-    def __init__(self, photoUrl):
+    def __init__(self, photoUrl = 0, imagePath = 0):
         self.photoUrl = photoUrl
         self.captionText = ''
         self.descriptionText = ''
         self.fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
         self.imgPath = '/tmp/image.jpg'
+        self.dlResultCode = 1
         
-        self.dlResultCode = self._downloadImage()
+        if ( 0 != imagePath):
+            self.imgPath = imagePath
+                            
+        if (photoUrl != 0):
+            self.dlResultCode = self._downloadImage()
     
     # protected setter methods
+    def _setPhotoUrl(self, url = 0):        
+        if (url != 0):
+            self.photoUrl = url
+            self.dlResultCode = self._downloadImage()
+            return self.dlResultCode
+        else:
+            return 1
+    
     def _setFontPath(self, fontPath = 0):        
         if (fontPath != 0):
             self.fontPath = fontPath
