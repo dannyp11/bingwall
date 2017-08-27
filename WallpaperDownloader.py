@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 import re
 
 from PIL import ImageFont, Image, ImageDraw
-from PIL.ImageChops import offset
 
 class BingWallpaper(object):
     '''
