@@ -1,5 +1,5 @@
 import unittest
-import requests
+import requests, re
 from bs4 import BeautifulSoup
 
 from PIL import ImageFont, Image, ImageDraw
@@ -50,27 +50,38 @@ class FunFactPrinter:
         result = -4
         
         # get quote
-        if (len(str(mainSection[0])) > 10):
-            self.mThought = str(mainSection[0])
-            result +=1
+        self.mThought = self._parseMainSectionModule(mainSection[0])
+        result += (len(self.mThought) > 0)
                 
         # get joke
-        if (len(str(mainSection[1])) > 10):
-            self.mJoke = str(mainSection[1])
-            result +=1
+        self.mJoke = self._parseMainSectionModule(mainSection[1])
+        result += (len(self.mJoke) > 0)
         
         # get fact
-        if (len(str(mainSection[2])) > 10):
-            self.mFact = str(mainSection[3])
-            result +=1
-            
+        self.mFact = self._parseMainSectionModule(mainSection[2])
+        result += (len(self.mFact) > 0)
+        
         # get idea
-        if (len(str(mainSection[3])) > 10):
-            self.mIdea = str(mainSection[3])
-            result +=1
+        self.mIdea = self._parseMainSectionModule(mainSection[3])
+        result += (len(self.mIdea) > 0)
         
         return result
 
+    def _parseMainSectionModule(self, section):
+        key = ''
+        if (len(str(section)) > 10):
+            key = str(section)
+            
+            # strip xml tag
+            key = re.sub('<[^>]*>', '', key)
+        
+        return key
+
+    def _dumpInfo(self):
+        print 'Thought: ' + self.mThought
+        print 'Idea: ' + self.mIdea
+        print 'Joke: ' + self.mJoke
+        print 'Fact: ' + self.mFact
 
 ###########################################################################
 # Unit test area
@@ -79,6 +90,7 @@ class TestFunFact(unittest.TestCase):
     def test_download_success(self):
         funFact = FunFactPrinter()
         self.assertEqual(0, funFact.mParseCode)
+        funFact._dumpInfo()
         
 if __name__ == '__main__':
     unittest.main()
