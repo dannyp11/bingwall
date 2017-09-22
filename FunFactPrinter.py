@@ -28,25 +28,25 @@ class FunFactPrinter:
     Print thought of the day
     '''
     def printThought(self, photoPath, x=0, y=0, fontSize=25, fontPath='DejaVuSans.ttf', dryRun = False):
-        return self._printTextToPhoto(self.mThought, photoPath, x, y, fontSize, fontPath)
+        return self._printTextToPhoto(self.mThought, photoPath, x, y, fontSize, fontPath, dryRun)
     
     '''
     Print idea of the day
     '''
     def printIdea(self, photoPath, x=0, y=0, fontSize=25, fontPath='DejaVuSans.ttf', dryRun = False):
-        return self._printTextToPhoto(self.mIdea, photoPath, x, y, fontSize, fontPath)
+        return self._printTextToPhoto(self.mIdea, photoPath, x, y, fontSize, fontPath, dryRun)
     
     '''
     Print fact of the day
     '''
     def printFact(self, photoPath, x=0, y=0, fontSize=25, fontPath='DejaVuSans.ttf', dryRun = False):
-        return self._printTextToPhoto(self.mFact, photoPath, x, y, fontSize, fontPath)
+        return self._printTextToPhoto(self.mFact, photoPath, x, y, fontSize, fontPath, dryRun)
     
     '''
     Print joke of the day
     '''
     def printJoke(self, photoPath, x=0, y=0, fontSize=25, fontPath='DejaVuSans.ttf', dryRun = False):
-        return self._printTextToPhoto(self.mJoke, photoPath, x, y, fontSize, fontPath)
+        return self._printTextToPhoto(self.mJoke, photoPath, x, y, fontSize, fontPath, dryRun)
     
     '''
     Print text to photo
