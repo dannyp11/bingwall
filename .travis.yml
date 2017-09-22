@@ -29,4 +29,6 @@ script:
 - python WeatherPrinter.py
 - python BingWallpaperDownloader.py
 - python PhotoProcessor.py
-- python bingwall.py -cd -p testImg.jpg -w 90010 -k api.key
+- python FunFactPrinter.py
+- python bingwall.py -cd -p testImg.jpg -w 90010 -k api.key -a0
+- python bingwall.py -cd -p testImg.jpg -w 90010 -k api.key -a1

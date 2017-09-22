@@ -17,22 +17,31 @@ As of June 2017 Microsoft doesn't provide official API to get its gorgeous image
   3. add weather (may need to register API key) - done
   4. nicer weather icon - done
   5. offset pixels for description & caption - done
-  6. what else?
+  6. embed fun fact of the day - done
+  7. what else?
 
 
 ## Usage
 ```
 $ python bingwall.py -h
-Usage: python bingwall.py OPTION [VALUE]
+Usage: python ./bingwall.py OPTION [VALUE]
+   Common options:
     -p {path}         where to save the image, default /tmp/image.jpg
+    -f {fontPath}     path to text font for everything, default /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+
+   Photo of the day options:
     -c                add caption to image
     -d                add description to image
-    -f {fontPath}     path to text font for caption & description. This will also trigger -c, default /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+
+   Weather options:
     -w {zipcode}      turn on weather feature, must also use -k option
     -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w
     -x {top left x}   topleft x pixel of weather info (optional)
     -y {top left y}   topleft y pixel of weather info (optional)
     -o {offset}       offset pixels from bottom for caption/description, default: 0
+
+   Fun X of the day options:
+    -a {mode}         optional fun fact/joke/quote/idea of the day to image, mode: 0(text box), 1(scatter)
     
 ```
 
@@ -41,3 +50,4 @@ Usage: python bingwall.py OPTION [VALUE]
 ![Alt text](https://raw.githubusercontent.com/dannyp11/bingwall/master/img/sample2.jpg?raw=true "With caption")
 ![Alt text](https://raw.githubusercontent.com/dannyp11/bingwall/master/img/sample1.jpg?raw=true "With caption & description")
 ![Alt text](https://raw.githubusercontent.com/dannyp11/bingwall/master/img/sample3.jpg?raw=true "With caption & description & weather info")
+![Alt text](https://raw.githubusercontent.com/dannyp11/bingwall/master/img/sample4.jpg?raw=true "With caption & description & weather info & fun fact")

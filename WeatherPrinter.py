@@ -284,13 +284,6 @@ class WeatherCity:
         if (os.path.isfile(photoPath) == False):
             return -2
         
-        # check fontPath exists
-#         newFontPath = fontPath.replace('/truetype','')
-#         if (os.path.isfile(fontPath) == False):
-#             # highly likely this is a fedora system, if so, remove the "/truetype" part
-#             if (os.path.isfile(newFontPath) == False):
-#                 return -3
-#         
         # load image
         img = Image.open(photoPath).convert("RGBA")
         draw = ImageDraw.Draw(img)                 

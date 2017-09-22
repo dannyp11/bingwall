@@ -3,7 +3,9 @@
 import urllib2
 import getopt, sys, os, shutil
 
-import WeatherPrinter, BingWallpaperDownloader
+import WeatherPrinter, BingWallpaperDownloader, FunFactPrinter
+from enum import Enum
+from random import randint
 
 '''
 Check if internet is on
@@ -16,6 +18,88 @@ def isInternetOn():
         return True
     except urllib2.URLError: 
         return False
+
+# Different modes for fun fact of the day option
+class FunFactMode(Enum):
+    OFF = 0
+    TEXT_BOX = 1
+    SCATTER = 2
+
+'''
+Add fun fact of the day to image
+Mode:
+    TEXT_BOX: save everything in 1 textbox
+    SCATTER:  randomly put various messages throughout the image
+    
+return    0 on success
+          -1 on failed parsing of data
+          -2 on failed saving photo
+          -3 on invalid mode
+'''
+def FunFactAdder(photoPath, fontPath, mode=FunFactMode.OFF):
+    # first we make sure mode isn't off
+    if (FunFactMode.OFF == mode):
+        # do nothing
+        return 0
+    
+    # create funfact printer object
+    funFact = FunFactPrinter.FunFactPrinter()
+    if (funFact.mParseCode != 0):
+        print 'Error code ' + str(funFact.mParseCode) + ' parsing fact of the day'
+        return -1
+    
+    funFact.dumpInfo()
+    
+    if (FunFactMode.TEXT_BOX == mode):
+        retVal = funFact.printAllToPhoto(photoPath, 50, 600, 25, fontPath)
+        if (retVal != 0):
+            print 'Error code ' + str(retVal) + ' printing textbox fun fact'
+            return -2
+    
+    elif (FunFactMode.SCATTER == mode):
+        # generate random text smart locations
+        minX = 10
+        minY = 500
+        maxX = 1500
+        maxY = 700
+        minFontSize = 22
+        maxFontSize = 27
+        
+        # print thought
+        x = randint(minX, maxX)
+        y = randint(minY, maxY)
+        fontSize = randint(minFontSize, maxFontSize)
+        retVal, resX, resY = funFact.printThought(photoPath, x, y, fontSize, fontPath)
+        retValOverall = retVal
+        
+        # print idea
+        x = randint(minX, maxX)
+        y = randint(minY, maxY)
+        fontSize = randint(minFontSize, maxFontSize)
+        retVal, resX, resY = funFact.printIdea(photoPath, x, y, fontSize, fontPath)
+        retValOverall += retVal
+        
+        # print joke
+        x = randint(minX, maxX)
+        y = randint(minY, maxY)
+        fontSize = randint(minFontSize, maxFontSize)
+        retVal, resX, resY = funFact.printJoke(photoPath, x, y, fontSize, fontPath)
+        retValOverall += retVal
+        
+        # print fact
+        x = randint(minX, maxX)
+        y = randint(minY, maxY)
+        fontSize = randint(minFontSize, maxFontSize)
+        retVal, resX, resY = funFact.printFact(photoPath, x, y, fontSize, fontPath)
+        retValOverall += retVal
+        
+        if (retValOverall != 0):
+            return -2
+        
+    else:
+        return -3
+    
+    return 0
 
 '''
 Print weather info with zipcode 
@@ -54,15 +138,23 @@ addDescription = 0
 offsetPix = 0
 def usage():
     print "Usage: python " + (sys.argv[0]) + " OPTION [VALUE]"
+    print "   Common options:"
     print "    -p {path}         where to save the image, default " + imgPath
+    print "    -f {fontPath}     path to text font for everything, default " + fontPath
+    print ""
+    print "   Photo of the day options:"
     print "    -c                add caption to image" 
     print "    -d                add description to image" 
-    print "    -f {fontPath}     path to text font for caption & description. This will also trigger -c, default " + fontPath
+    print ""
+    print "   Weather options:"
     print "    -w {zipcode}      turn on weather feature, must also use -k option"
     print "    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w"
     print "    -x {top left x}   topleft x pixel of weather info (optional)"
     print "    -y {top left y}   topleft y pixel of weather info (optional)"
     print "    -o {offset}       offset pixels from bottom for caption/description, default: " + str(offsetPix)
+    print ""
+    print "   Fun X of the day options:"
+    print "    -a {mode}         optional fun fact/joke/quote/idea of the day to image, mode: 0(text box), 1(scatter)"
 
 def main():    
     
@@ -77,9 +169,10 @@ def main():
     weatherX = -1
     weatherY = -1
     offsetPix = 0
+    funFactMode = FunFactMode.OFF
         
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:x:y:o:', ['path=','help'])
+        opts, args = getopt.getopt(sys.argv[1:], 'p:hdcf:w:k:x:y:o:a:', ['path=','help'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -108,6 +201,8 @@ def main():
             offsetPix = int(arg)
             if (offsetPix < 0):
                 offsetPix = 0
+        elif opt in ('-a'):
+            funFactMode = FunFactMode(int(arg) + 1)
             
     # check internet
     if (isInternetOn() == False):
@@ -155,6 +250,15 @@ def main():
             result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
         else:
             result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
+        
+        if (result != 0):
+            print 'Error code ' + str(result) + ' printing weather to ' + imgPath
+    
+    # add fact of the day
+    if (funFactMode != FunFactMode.OFF):
+        result = FunFactAdder(inputImg, fontPath, funFactMode)
+        if (result != 0):
+            print 'Error code ' + str(result) + ' adding fun fact to ' + imgPath
     
     if (result == 0):
         print "Successfully saved " + imgPath
