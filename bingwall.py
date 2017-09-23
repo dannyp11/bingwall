@@ -38,10 +38,10 @@ def isBoxIntersect((x1, y1, w1, h1),(x2, y2, w2, h2)):
     maxX2 = x2 + w2
     maxY2 = y2 + h2
     
-    retVal &= (maxX1 < x2)
-    retVal &= (x1 > maxX2)
-    retVal &= (maxY1 < y2)
-    retVal &= (y1 > maxY2)
+    retVal &= not (maxX1 < x2)
+    retVal &= not (x1 > maxX2)
+    retVal &= not (maxY1 < y2)
+    retVal &= not (y1 > maxY2)
     
     return retVal
 
@@ -84,8 +84,8 @@ def FunFactAdder(photoPath, fontPath, mode=FunFactMode.OFF):
         minY = 30
         maxX = 1920
         maxY = 700
-        minFontSize = 22
-        maxFontSize = 28
+        minFontSize = 20
+        maxFontSize = 25
         
         # get metrics of textboxes first
         fontSizeThought = randint(minFontSize, maxFontSize)
