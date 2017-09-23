@@ -1,4 +1,4 @@
-import unittest, os.path
+import unittest, os.path, string
 import requests, re
 from bs4 import BeautifulSoup
 
@@ -19,10 +19,11 @@ class FunFactPrinter:
     For debug purpose
     '''
     def dumpInfo(self):
-        print 'Thought: ' + self.mThought
-        print 'Idea: ' + self.mIdea
-        print 'Joke: ' + self.mJoke
-        print 'Fact: ' + self.mFact    
+        printable = set(string.printable) # for logging compatibility
+        print 'Thought: ' + filter(lambda x: x in printable, self.mThought)
+        print 'Idea: ' + filter(lambda x: x in printable, self.mIdea)
+        print 'Joke: ' + filter(lambda x: x in printable, self.mJoke)
+        print 'Fact: ' + filter(lambda x: x in printable, self.mFact )   
     
     '''
     Print thought of the day
