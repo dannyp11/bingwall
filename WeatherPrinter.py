@@ -271,7 +271,7 @@ class WeatherCity:
     
     x, y - top left pixel position of weather info
     
-    return 0 if success 
+    return 0 if success , width and height of weather box
     '''
     def addWeatherToPhoto(self, photoPath, x = 540, y = 10, fontSize = 30, fontPath = 'DejaVuSans.ttf'):
         retVal = 0
@@ -305,7 +305,7 @@ class WeatherCity:
         # save result img
         img.convert('RGB').save(photoPath)
         
-        return retVal
+        return retVal, resX - x, resY -y
 
 ##########################################################################
 # unit test area
@@ -339,8 +339,10 @@ class TestWeatherPrinter(unittest.TestCase):
         
         # get test weather info
         losAngeles = WeatherCity(90010)
-        self.assertEqual(losAngeles.mParseCode, 0)
-        self.assertEqual(losAngeles.addWeatherToPhoto(testImage, fontSize=50), 0)
+        retVal, w, h = losAngeles.addWeatherToPhoto(testImage, fontSize=50)
+        self.assertEqual(retVal, 0)
+        self.assertGreater(w, 0)
+        self.assertGreater(h, 0)
     
     # comprehensive test, requires functional bingwall
     # the reason for this is that I can't test bingwall directly, so this is more like integration test
@@ -354,7 +356,10 @@ class TestWeatherPrinter(unittest.TestCase):
         
         # print weather info
         losAngeles  = WeatherCity(90010)
-        self.assertEqual(losAngeles.addWeatherToPhoto(testImage, fontSize=50), 0)
+        retVal, w, h = losAngeles.addWeatherToPhoto(testImage, fontSize=50)
+        self.assertEqual(retVal, 0)
+        self.assertGreater(w, 0)
+        self.assertGreater(h, 0)
         print "Check out weather info in " + testImage
     
 if __name__ == '__main__':

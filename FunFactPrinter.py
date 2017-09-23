@@ -1,11 +1,11 @@
-import unittest, os.path, string
+import unittest, os.path
 import requests, re
 from bs4 import BeautifulSoup
 
 from PIL import ImageFont, Image, ImageDraw
 
 '''
-
+Parse and print fun fact of the day
 '''
 class FunFactPrinter:
     def __init__(self):

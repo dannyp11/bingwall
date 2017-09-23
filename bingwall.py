@@ -26,6 +26,26 @@ class FunFactMode(Enum):
     SCATTER = 2
 
 '''
+Check if 2 boxes intersect
+Input: (box1), (box2)
+        box info: top left x/y and width, height
+'''
+def isBoxIntersect((x1, y1, w1, h1),(x2, y2, w2, h2)):
+    retVal = True
+    
+    maxX1 = x1 + w1
+    maxY1 = y1 + h1
+    maxX2 = x2 + w2
+    maxY2 = y2 + h2
+    
+    retVal &= (maxX1 < x2)
+    retVal &= (x1 > maxX2)
+    retVal &= (maxY1 < y2)
+    retVal &= (y1 > maxY2)
+    
+    return retVal
+
+'''
 Add fun fact of the day to image
 Mode:
     TEXT_BOX: save everything in 1 textbox
@@ -57,40 +77,114 @@ def FunFactAdder(photoPath, fontPath, mode=FunFactMode.OFF):
             return -2
     
     elif (FunFactMode.SCATTER == mode):
+        retValOverall = 0
+        
         # generate random text smart locations
         minX = 10
-        minY = 500
-        maxX = 1500
+        minY = 10
+        maxX = 1920
         maxY = 700
         minFontSize = 22
-        maxFontSize = 27
+        maxFontSize = 28
+        
+        # get metrics of textboxes first
+        fontSizeThought = randint(minFontSize, maxFontSize)
+        fontSizeIdea = randint(minFontSize, maxFontSize)
+        fontSizeFact = randint(minFontSize, maxFontSize)
+        fontSizeJoke = randint(minFontSize, maxFontSize)
+        
+        retVal, thoughtW, thoughtH = funFact.printThought(photoPath, 0, 0, fontSizeThought, fontPath, True)
+        retVal, ideaW, ideaH = funFact.printThought(photoPath, 0, 0, fontSizeIdea, fontPath, True)
+        retVal, factW, factH = funFact.printThought(photoPath, 0, 0, fontSizeFact, fontPath, True)
+        retVal, jokeW, jokeH = funFact.printThought(photoPath, 0, 0, fontSizeJoke, fontPath, True)
         
         # print thought
-        x = randint(minX, maxX)
-        y = randint(minY, maxY)
-        fontSize = randint(minFontSize, maxFontSize)
-        retVal, resX, resY = funFact.printThought(photoPath, x, y, fontSize, fontPath)
-        retValOverall = retVal
+        tmpMaxX = -1
+        xThought = yThought = -1
+        while (tmpMaxX < minX):
+            tmpMaxX = maxX - thoughtW - 10
+            yThought = randint(minY, maxY)
+            if (yThought < 400): # update maxX because this conflicts with weather text box
+                tmpMaxX -= 500
+                
+        xThought = randint(minX, tmpMaxX)
+        shouldPrint = randint(0, 1)
+        retVal, resX, resY = funFact.printThought(photoPath, xThought, yThought, fontSizeThought, fontPath, shouldPrint)
+        retValOverall += retVal
         
         # print idea
-        x = randint(minX, maxX)
-        y = randint(minY, maxY)
-        fontSize = randint(minFontSize, maxFontSize)
-        retVal, resX, resY = funFact.printIdea(photoPath, x, y, fontSize, fontPath)
+        xIdea = yIdea = -1
+        while (True):
+            tmpMaxX = maxX - ideaW - 10
+            yIdea = randint(minY, maxY)
+            if (yIdea < 400): # update maxX because this conflicts with weather text box
+                tmpMaxX -= 500
+
+            if (tmpMaxX < minX):
+                continue
+                        
+            xIdea = randint(minX, tmpMaxX)
+            # avoid thought box
+            if (True == isBoxIntersect((xIdea, yIdea, ideaW, ideaH), (xThought, yThought, thoughtW, thoughtH))):
+                continue
+            break
+            
+        shouldPrint = randint(0, 1)
+        retVal, resX, resY = funFact.printIdea(photoPath, xIdea, yIdea, fontSizeIdea, fontPath, shouldPrint)
         retValOverall += retVal
         
         # print joke
-        x = randint(minX, maxX)
-        y = randint(minY, maxY)
-        fontSize = randint(minFontSize, maxFontSize)
-        retVal, resX, resY = funFact.printJoke(photoPath, x, y, fontSize, fontPath)
+        xJoke = yJoke = -1
+        while (True):
+            tmpMaxX = maxX - jokeW - 10
+            yJoke = randint(minY, maxY)
+            if (yJoke < 400): # update maxX because this conflicts with weather text box
+                tmpMaxX -= 500
+
+            if (tmpMaxX < minX):
+                continue
+                        
+            xJoke = randint(minX, tmpMaxX)
+            # avoid thought box
+            if (True == isBoxIntersect((xJoke, yJoke, jokeW, jokeH), (xThought, yThought, thoughtW, thoughtH))):
+                continue
+            
+            # avoid idea box
+            if (True == isBoxIntersect((xJoke, yJoke, jokeW, jokeH), (xIdea, yIdea, ideaW, ideaH))):
+                continue
+            break
+        
+        shouldPrint = randint(0, 1)
+        retVal, resX, resY = funFact.printJoke(photoPath, xJoke, yJoke, fontSizeJoke, fontPath, shouldPrint)
         retValOverall += retVal
         
         # print fact
-        x = randint(minX, maxX)
-        y = randint(minY, maxY)
-        fontSize = randint(minFontSize, maxFontSize)
-        retVal, resX, resY = funFact.printFact(photoPath, x, y, fontSize, fontPath)
+        xFact = yFact = -1
+        while (True):
+            tmpMaxX = maxX - factW - 10
+            yFact = randint(minY, maxY)
+            if (yFact < 400): # update maxX because this conflicts with weather text box
+                tmpMaxX -= 500
+
+            if (tmpMaxX < minX):
+                continue
+                        
+            xFact = randint(minX, tmpMaxX)
+            # avoid thought box
+            if (True == isBoxIntersect((xFact, yFact, factW, factH), (xThought, yThought, thoughtW, thoughtH))):
+                continue
+            
+            # avoid idea box
+            if (True == isBoxIntersect((xFact, yFact, factW, factH), (xIdea, yIdea, ideaW, ideaH))):
+                continue
+            
+            # avoid joke box
+            if (True == isBoxIntersect((xFact, yFact, factW, factH), (xJoke, yJoke, jokeW, jokeH))):
+                continue
+            break        
+
+        shouldPrint = randint(0, 1)
+        retVal, resX, resY = funFact.printFact(photoPath, xFact, yFact, fontSizeFact, fontPath, shouldPrint)
         retValOverall += retVal
         
         if (retValOverall != 0):
@@ -110,7 +204,9 @@ apiKeyPath - path to api key
 photoPath  - path to photo that needs weather info printed on
 fontPath   - path to font file
 
-return    0  on success
+return  retVal, width, height of weather box   
+        retVal: 
+           0  on success
           -1 on invalid key
           -2 on invalid zipcode
           -3 on fail getting weather info
@@ -245,11 +341,12 @@ def main():
         print "Error: can't export image " + str(outputImg)                                        
     
     # add weather info
+    weatherWidth = weatherHeight = 0
     if (result == 0 and addWeather == 1):
         if (weatherX >= 0 and weatherY >= 0):
-            result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
+            result, weatherWidth, weatherHeight = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
         else:
-            result = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
+            result, weatherWidth, weatherHeight = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
         
         if (result != 0):
             print 'Error code ' + str(result) + ' printing weather to ' + imgPath
