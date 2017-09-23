@@ -81,7 +81,7 @@ def FunFactAdder(photoPath, fontPath, mode=FunFactMode.OFF):
         
         # generate random text smart locations
         minX = 10
-        minY = 10
+        minY = 30
         maxX = 1920
         maxY = 700
         minFontSize = 22
