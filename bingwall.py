@@ -84,8 +84,8 @@ def FunFactAdder(photoPath, fontPath, mode=FunFactMode.OFF):
         minY = 30
         maxX = 1920
         maxY = 700
-        minFontSize = 20
-        maxFontSize = 25
+        minFontSize = 18
+        maxFontSize = 22
         
         # get metrics of textboxes first
         fontSizeThought = randint(minFontSize, maxFontSize)
