@@ -89,10 +89,12 @@ class FunFactPrinter:
     
     photoPath - existing photo to print data on
     x,y - top left pixel of the text box
+    dryRun - print nothing to image, this is to get size of textbox only
     
     return 0 if success 
+            result w, h of the text box
     '''
-    def printAllToPhoto(self, photoPath, x=0, y=0, fontSize=30, fontPath = 'DejaVuSans.ttf'):
+    def printAllToPhoto(self, photoPath, x=0, y=0, fontSize=30, fontPath = 'DejaVuSans.ttf', dryRun = False):
         retVal = 0
         
         # prevent going further
@@ -115,16 +117,19 @@ class FunFactPrinter:
         draw = ImageDraw.Draw(img)
                 
         # add background box
-        rectDraw = Image.new('RGBA', (resX - x + fontSize, resY - y + 10), (0,0,0,100))
+        boxW = resX - x + fontSize
+        boxH = resY - y + 10
+        rectDraw = Image.new('RGBA', (boxW, boxH), (0,0,0,100))
         img.paste(rectDraw, (x - fontSize/2, y - 5), rectDraw)
         
         # redraw text
         retVal, resX, resY = self._printAllText(draw, (x, y), fontSize, fontPath)        
         
         # save result img
-        img.convert('RGB').save(photoPath)
+        if (False == dryRun):
+            img.convert('RGB').save(photoPath)
         
-        return retVal
+        return retVal, boxW, boxH
     
     '''
     Download and parse data to member vars

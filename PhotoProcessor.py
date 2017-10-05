@@ -62,6 +62,9 @@ class PhotoProcessor:
     
     outputImg: path to output
     offsetPixels: y-offset for caption/description, useful for bottom taskbar
+    
+    return result = 0 if success
+            y_text: top left y of result image
     '''
     def ExportImage(self, outputImg = 0, offsetPixels = 0):   
         result = 0
@@ -89,7 +92,7 @@ class PhotoProcessor:
         else:
             img.save(self.imgPath)
         
-        return result
+        return result, y_text
     
     
     ###################################################################
@@ -214,16 +217,16 @@ class TestPhotoProcessor(unittest.TestCase):
     def test_print_image(self):        
         processor = PhotoProcessor(self.__class__.imgUrl)
         self.assertEqual(0, processor.dlResultCode)
-        self.assertEqual(0, processor.ExportImage('img1.jpg'))
+        self.assertEqual(0, processor.ExportImage('img1.jpg')[0])
         processor2 = PhotoProcessor(self.__class__.imgUrlHd)
         self.assertEqual(0, processor2.dlResultCode)
-        self.assertEqual(0, processor2.ExportImage('imghd.jpg'))
+        self.assertEqual(0, processor2.ExportImage('imghd.jpg')[0])
     
     def test_add_caption(self):
         processor = PhotoProcessor(self.__class__.imgUrlHd)
         self.assertEqual(0, processor.dlResultCode)
         self.assertEqual(0, processor._setCaption('caption here (below text)'))
-        self.assertEqual(0, processor.ExportImage('caption.jpg', 0))
+        self.assertEqual(0, processor.ExportImage('caption.jpg', 0)[0])
         
     def test_add_description(self):
         processor = PhotoProcessor(self.__class__.imgUrlHd)
@@ -233,7 +236,7 @@ class TestPhotoProcessor(unittest.TestCase):
             desc += 'sample descritpion text, should be long text'
         
         self.assertEqual(0, processor._setDescription(desc))
-        self.assertEqual(0, processor.ExportImage('desc.jpg', 0))
+        self.assertEqual(0, processor.ExportImage('desc.jpg', 0)[0])
         
     def test_comprehensive(self):
         processor = PhotoProcessor(self.__class__.imgUrlHd)
@@ -244,7 +247,7 @@ class TestPhotoProcessor(unittest.TestCase):
             desc += 'sample descritpion text, should be long text'
         self.assertEqual(0, processor._setCaption('caption here (below text)'))
         self.assertEqual(0, processor._setDescription(desc))
-        self.assertEqual(0, processor.ExportImage('fulloackage.jpg', 0))
+        self.assertEqual(0, processor.ExportImage('fulloackage.jpg', 0)[0])
         
 if __name__ == '__main__':
     unittest.main()

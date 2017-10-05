@@ -177,14 +177,14 @@ class TestBingWallpaper(unittest.TestCase):
         self.assertEqual(0, wallpaper.dlResultCode)
         self.assertEqual(0, wallpaper.ParseDescription())
         self.assertEqual(0, wallpaper.ParseCaption())
-        self.assertEqual(0, wallpaper.ExportImage('img2.jpg'))
+        self.assertEqual(0, wallpaper.ExportImage('img2.jpg')[0])
     
     def test_comprehensiveOffset(self):
         wallpaper = BingWallpaper(self.__class__.imgPath, fontPath='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
         self.assertEqual(0, wallpaper.dlResultCode)
         self.assertEqual(0, wallpaper.ParseDescription())
         self.assertEqual(0, wallpaper.ParseCaption())
-        self.assertEqual(0, wallpaper.ExportImage('img3.jpg', 100))
+        self.assertEqual(0, wallpaper.ExportImage('img3.jpg', 100)[0])
         
 if __name__ == '__main__':
     unittest.main()
