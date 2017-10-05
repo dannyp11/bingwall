@@ -210,9 +210,9 @@ def main():
     weatherWidth = weatherHeight = 0
     if (result == 0 and addWeather == 1):
         if (weatherX >= 0 and weatherY >= 0):
-            result, weatherWidth, weatherHeight, weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
+            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
         else:
-            result, weatherWidth, weatherHeight, weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
+            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
         
         if (result != 0):
             print 'Error code ' + str(result) + ' printing weather to ' + imgPath
