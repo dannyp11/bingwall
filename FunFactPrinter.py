@@ -280,7 +280,7 @@ class TestFunFact(unittest.TestCase):
         img.save(testImage)
         
         # print to img
-        self.assertEquals(funFact.printAllToPhoto(testImage, x=100, y=100, fontSize=20), 0)
+        self.assertEquals(funFact.printAllToPhoto(testImage, x=100, y=100, fontSize=20)[0], 0)
         
     def test_print_single_to_photo(self):
         funFact = FunFactPrinter()
