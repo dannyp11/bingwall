@@ -229,6 +229,7 @@ def main():
         result = funFactMgr.exportToImage(imgPath)
         if (0 != result):
             print 'Error code ' + str(result) + ' exporting funfact to ' + imgPath
+            result = 0 # still process even though fun fact parser fails
     
     # make sure img is there
     if (False == os.path.isfile(imgPath)):
