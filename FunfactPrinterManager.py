@@ -24,11 +24,14 @@ class FunFactManager():
     fontPath     - optional font path
     '''
     def __init__(self, funfactMode, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
-        self.mFunFactPrinter = FunFactPrinter()
         self.mFontPath = fontPath
         self.mFactMode = funfactMode
         self.mExistingBoxes = Set([])
-        self.mResultCode = self._initialize()
+        self.mFunFactPrinter = 0
+        self.mResultCode = -1
+        if (FunFactMode.OFF != funfactMode):
+            self.mFunFactPrinter = FunFactPrinter()
+            self.mResultCode = self._initialize()
         
     '''
     Init the object
