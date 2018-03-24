@@ -24,14 +24,13 @@ def getApiKey(fileName = 'api.key'):
         return -1
 
 class WeatherCity:
-    def __init__(self, zipcode, keyFile = 'api.key'):
+    def __init__(self, cityName, keyFile = 'api.key'):
         '''
         All temps are in C
         '''
         self.mParseCode = -1
         self.mApiKey = -1
-        self.mCityName = 0
-        self.mZipcode = 12345
+        self.mCityName = 0 
         self.mMaxTemp = -300
         self.mCurTemp = -300
         self.mMinTemp = -300
@@ -43,10 +42,9 @@ class WeatherCity:
         self.mWindspeed = -1
         
         self.mApiKey = getApiKey(keyFile)
-        self.mZipcode = zipcode
 
         if (self.mApiKey == -1 or self._isInternetOn() == False):
-            print "Error creating WeatherCity object for " + str(zipcode) + ":",
+            print "Error creating WeatherCity object for " + cityName + ":",
             if (self.mApiKey == -1):
                 print "invalid apikey file " + keyFile
             else:
@@ -54,7 +52,7 @@ class WeatherCity:
             return
         
         # build api call
-        apiUrl = "http://api.openweathermap.org/data/2.5/weather?zip=" + str(zipcode)  +  ",us&units=metric&appid=" + self.mApiKey
+        apiUrl = "http://api.openweathermap.org/data/2.5/weather?q=" + cityName.replace(" ", "%20")  +  ",us&units=metric&appid=" + self.mApiKey
         print "weather url " + apiUrl
         
         apiResponse = urllib2.urlopen(apiUrl)
@@ -64,7 +62,7 @@ class WeatherCity:
                 
         parseResult = self.parseWeatherJson(resultJson)
         if (0 != parseResult):
-            print "Error parsing WeatherCity object for " + str(zipcode) + " code " + str(parseResult)
+            print "Error parsing WeatherCity object for " + cityName + " code " + str(parseResult)
             self._dumpInfo()
             return
         
@@ -274,8 +272,6 @@ class WeatherCity:
     return 0 if success , width and height of weather box
     '''
     def addWeatherToPhoto(self, photoPath, x = 540, y = 10, fontSize = 30, fontPath = 'DejaVuSans.ttf'):
-        retVal = 0
-        
         # prevent going further
         if (self.mParseCode != 0):
             return -1
@@ -322,8 +318,8 @@ class TestWeatherPrinter(unittest.TestCase):
             sys.exit(1)
 
     def test_info_success(self):        
-        losAngeles = WeatherCity(90010)
-        lagunaHills = WeatherCity(92653)
+        losAngeles = WeatherCity("Los Angeles")
+        lagunaHills = WeatherCity("Laguna Hills")
         self.assertEqual(losAngeles.mParseCode, 0)
         self.assertEqual(lagunaHills.mParseCode, 0)
         
@@ -338,7 +334,7 @@ class TestWeatherPrinter(unittest.TestCase):
         img.save(testImage)
         
         # get test weather info
-        losAngeles = WeatherCity(90010)
+        losAngeles = WeatherCity('Los Angeles')
         retVal, w, h = losAngeles.addWeatherToPhoto(testImage, fontSize=50)
         self.assertEqual(retVal, 0)
         self.assertGreater(w, 0)
@@ -355,7 +351,7 @@ class TestWeatherPrinter(unittest.TestCase):
         self.assertEqual(downloadSuccess, 0)
         
         # print weather info
-        losAngeles  = WeatherCity(90010)
+        losAngeles  = WeatherCity('Los Angeles')
         retVal, w, h = losAngeles.addWeatherToPhoto(testImage, fontSize=50)
         self.assertEqual(retVal, 0)
         self.assertGreater(w, 0)

@@ -53,10 +53,10 @@ def FunFactAdder(photoPath, fontPath, mode=FunFactMode.OFF):
     return 0
 
 '''
-Print weather info with zipcode 
+Print weather info with city name 
 Requires api key from openweathermap.org
 
-zipcode    - city zipcode
+name       - city name
 apiKeyPath - path to api key
 photoPath  - path to photo that needs weather info printed on
 fontPath   - path to font file
@@ -65,25 +65,28 @@ return  retVal, width, height, x, y of weather box
         retVal: 
            0  on success
           -1 on invalid key
-          -2 on invalid zipcode
+          -2 on invalid city name
           -3 on fail getting weather info
 '''
-def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):    
+def WeatherAdder(cityName, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
     # invalid api key
     if (os.path.isfile(apiKeyPath) == False):
-        return "Error " + apiKeyPath + " not found"
+        print "Error " + apiKeyPath + " not found"
+        return (-1, 0, 0), 0, 0 
     
     # invalid zipcode, quick n dirty check
-    if (int(zipcode) < 501 or int(zipcode) > 99950):
-        return "Error " + str(zipcode) + " is invalid zipcode"
+    if (False == any(c.isalpha() for c in cityName)):
+        print "Error " + cityName + " is invalid city name"
+        return (-2, 0, 0), 0, 0
     
     # create weather printer object
-    weatherCity = WeatherPrinter.WeatherCity(zipcode, apiKeyPath)
+    weatherCity = WeatherPrinter.WeatherCity(cityName, apiKeyPath)
     
     if (weatherCity.mParseCode != 0):
-        return "Error code " + str(weatherCity.mParseCode) + " parsing weather info"
+        print "Error code " + str(weatherCity.mParseCode) + " parsing weather info"
+        return (-3, 0, 0), 0, 0
     
-    return weatherCity.addWeatherToPhoto(photoPath, x, y, 40, fontPath), x, y   
+    return weatherCity.addWeatherToPhoto(photoPath, x, y, 40, fontPath), x, y
 
 imgPath = '/tmp/image.jpg'
 fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
@@ -100,7 +103,7 @@ def usage():
     print "    -d                add description to image" 
     print ""
     print "   Weather options:"
-    print "    -w {zipcode}      turn on weather feature, must also use -k option"
+    print "    -w {city name}    turn on weather feature, must also use -k option"
     print "    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w"
     print "    -x {top left x}   topleft x pixel of weather info (optional)"
     print "    -y {top left y}   topleft y pixel of weather info (optional)"
@@ -113,7 +116,7 @@ def main():
     
     result = 0
     apiKeyPath = 0
-    weatherZipcode = 0
+    weatherCityName = ''
     imgPath = '/tmp/image.jpg'
     fontPath = 'DejaVuSans.ttf'
     addCaption = 0
@@ -145,7 +148,7 @@ def main():
         elif opt in ('-k'):
             apiKeyPath = arg
         elif opt in ('-w'):
-            weatherZipcode = arg
+            weatherCityName = arg
         elif opt in ('-x'):
             weatherX = int(arg)
         elif opt in ('-y'):
@@ -163,7 +166,7 @@ def main():
         return 1
     
     # check if weather option is chosen
-    if (apiKeyPath != 0 and weatherZipcode > 0):
+    if (apiKeyPath != 0 and len(weatherCityName) > 0):
         addWeather = 1
     
     # build wallpaperDownloader object
@@ -210,9 +213,9 @@ def main():
     weatherWidth = weatherHeight = 0
     if (result == 0 and addWeather == 1):
         if (weatherX >= 0 and weatherY >= 0):
-            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
+            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherCityName, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
         else:
-            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
+            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherCityName, apiKeyPath, inputImg, fontPath)
         
         if (result != 0):
             print 'Error code ' + str(result) + ' printing weather to ' + imgPath
