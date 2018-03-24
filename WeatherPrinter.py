@@ -52,7 +52,9 @@ class WeatherCity:
             return
         
         # build api call
-        apiUrl = "http://api.openweathermap.org/data/2.5/weather?q=" + cityName.replace(" ", "%20")  +  ",us&units=metric&appid=" + self.mApiKey
+        eligibleCitiName = cityName.replace("_", "%20")
+        eligibleCitiName = eligibleCitiName.replace(" ", "%20")
+        apiUrl = "http://api.openweathermap.org/data/2.5/weather?q=" + eligibleCitiName +  ",us&units=metric&appid=" + self.mApiKey
         print "weather url " + apiUrl
         
         apiResponse = urllib2.urlopen(apiUrl)
