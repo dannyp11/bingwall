@@ -18,7 +18,8 @@ As of June 2017 Microsoft doesn't provide official API to get its gorgeous image
   4. nicer weather icon - done
   5. offset pixels for description & caption - done
   6. embed fun fact of the day - done
-  7. what else?
+  7. auto detect current location for weather - done
+  8. what else?
 
 
 ## Usage
@@ -34,15 +35,15 @@ Usage: python ./bingwall.py OPTION [VALUE]
     -d                add description to image
 
    Weather options:
-    -w {zipcode}      turn on weather feature, must also use -k option
-    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w
+    -w {city name}    turn on weather feature, must also use -k option
+    -k {api.key path} path to api key file for http://openweathermap.org/appid,
+                           if -w isn't supplied, use current location
     -x {top left x}   topleft x pixel of weather info (optional)
     -y {top left y}   topleft y pixel of weather info (optional)
     -o {offset}       offset pixels from bottom for caption/description, default: 0
 
    Fun X of the day options:
     -a {mode}         optional fun fact/joke/quote/idea of the day to image, mode: 0(text box), 1(scatter)
-    
 ```
 
 ## Sample output

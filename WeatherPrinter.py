@@ -24,7 +24,7 @@ def getApiKey(fileName = 'api.key'):
         return -1
 
 class WeatherCity:
-    def __init__(self, cityName, keyFile = 'api.key'):
+    def __init__(self, cityName = '', keyFile = 'api.key'):
         '''
         All temps are in C
         '''
@@ -42,13 +42,20 @@ class WeatherCity:
         self.mWindspeed = -1
         
         self.mApiKey = getApiKey(keyFile)
+        
+        if (self._isInternetOn() == False):
+            print "Error creating WeatherCity object for " + cityName + ": no internet connection"
+            return
 
-        if (self.mApiKey == -1 or self._isInternetOn() == False):
-            print "Error creating WeatherCity object for " + cityName + ":",
-            if (self.mApiKey == -1):
-                print "invalid apikey file " + keyFile
-            else:
-                print " no internet connection"
+        # If city name is empty, try getting current location
+        #  this is provided by geocode service that tracks ip address
+        if (len(cityName) == 0):
+            locReq = urllib.urlopen('http://freegeoip.net/json')
+            locData = json.loads(locReq.read())
+            cityName = locData['city']
+
+        if (self.mApiKey == -1):
+            print "Error creating WeatherCity object for " + cityName + ": invalid apikey file " + keyFile
             return
         
         # build api call
@@ -311,12 +318,12 @@ class WeatherCity:
 class TestWeatherPrinter(unittest.TestCase):
 
     def test_api_exist(self):
-        apiKeyFIle = 'api.key'
+        apiKeyFile = 'api.key'
         
-        if (os.path.isfile(apiKeyFIle) != True):
-            print " Error: " + apiKeyFIle + " not exists"
+        if (os.path.isfile(apiKeyFile) != True):
+            print " Error: " + apiKeyFile + " not exists"
             print " Perhaps you may need to register a free key with https://openweathermap.org/price"
-            print " and put the key inside " + apiKeyFIle + " file on the same directory as this unit test script"
+            print " and put the key inside " + apiKeyFile + " file on the same directory as this unit test script"
             sys.exit(1)
 
     def test_info_success(self):        
@@ -327,6 +334,12 @@ class TestWeatherPrinter(unittest.TestCase):
         
         self.assertEqual(losAngeles.mCityName, 'Los Angeles')
         self.assertEqual(lagunaHills.mCityName, 'Laguna Hills')        
+        
+    # get current city info
+    def test_get_current_city(self):
+        curCity = WeatherCity()
+        self.assertEqual(curCity.mParseCode, 0)
+        self.assertGreater(len(curCity.mCityName), 0)
         
     # this doesn't require bingwall
     def test_print_blankpicture(self):

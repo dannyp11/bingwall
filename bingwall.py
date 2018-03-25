@@ -19,40 +19,6 @@ def isInternetOn():
         return False
 
 '''
-Add fun fact of the day to image
-Mode:
-    TEXT_BOX: save everything in 1 textbox
-    SCATTER:  randomly put various messages throughout the image
-    
-return    0 on success
-          -1 on failed parsing of data
-          -2 on failed saving photo
-          -3 on invalid mode
-'''
-def FunFactAdder(photoPath, fontPath, mode=FunFactMode.OFF):
-    # first we make sure mode isn't off
-    if (FunFactMode.OFF == mode):
-        # do nothing
-        return 0
-    
-    # create funfact printer object
-    funFact = FunFactManager(mode, fontPath)
-    if (0 != funFact.mResultCode):
-        print 'Error code ' + str(funFact.mResultCode) + ' initing funfact manager'
-        return -1
-    
-    # debug message
-    funFact.dumpInfo()
-    
-    # print data
-    result = funFact.exportToImage(photoPath)
-    if (0 != result):
-        print 'Error code ' + str(result) + ' exporting funfact to ' + photoPath
-        return -2
-    
-    return 0
-
-'''
 Print weather info with city name 
 Requires api key from openweathermap.org
 
@@ -74,8 +40,8 @@ def WeatherAdder(cityName, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
         print "Error " + apiKeyPath + " not found"
         return (-1, 0, 0), 0, 0 
     
-    # invalid zipcode, quick n dirty check
-    if (False == any(c.isalpha() for c in cityName)):
+    # invalid city name quick n dirty check
+    if (len(cityName) > 0 and False == any(c.isalpha() for c in cityName)):
         print "Error " + cityName + " is invalid city name"
         return (-2, 0, 0), 0, 0
     
@@ -104,7 +70,8 @@ def usage():
     print ""
     print "   Weather options:"
     print "    -w {city name}    turn on weather feature, must also use -k option"
-    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid, must also use -w"
+    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid," 
+    print "                           if -w isn't supplied, use current location"
     print "    -x {top left x}   topleft x pixel of weather info (optional)"
     print "    -y {top left y}   topleft y pixel of weather info (optional)"
     print "    -o {offset}       offset pixels from bottom for caption/description, default: " + str(offsetPix)
@@ -121,7 +88,6 @@ def main():
     fontPath = 'DejaVuSans.ttf'
     addCaption = 0
     addDescription = 0   
-    addWeather = 0
     weatherX = -1
     weatherY = -1
     offsetPix = 0
@@ -165,10 +131,6 @@ def main():
         print "Internet is off"
         return 1
     
-    # check if weather option is chosen
-    if (apiKeyPath != 0 and len(weatherCityName) > 0):
-        addWeather = 1
-    
     # build wallpaperDownloader object
     wallpaper = BingWallpaperDownloader.BingWallpaper(imgPath, fontPath)
     if (0 != wallpaper.dlResultCode):
@@ -177,7 +139,7 @@ def main():
     
     # build fun fact mgr object
     funFactMgr = FunFactManager(funFactMode, fontPath)
-    if (0 != funFactMgr.mResultCode):
+    if (0 != funFactMgr.mResultCode and funFactMode != FunFactMode.OFF):
         print 'Error code ' + str(funFactMgr.mResultCode) + ' initing funfact manager'
     
     # add description to image        
@@ -211,7 +173,7 @@ def main():
     
     # add weather info
     weatherWidth = weatherHeight = 0
-    if (result == 0 and addWeather == 1):
+    if (result == 0 and apiKeyPath != 0):
         if (weatherX >= 0 and weatherY >= 0):
             (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherCityName, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
         else:
