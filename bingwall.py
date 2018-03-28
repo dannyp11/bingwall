@@ -31,22 +31,20 @@ return  retVal, width, height, x, y of weather box
         retVal: 
            0  on success
           -1 on invalid key
-          -2 on invalid city name
           -3 on fail getting weather info
 '''
-def WeatherAdder(cityName, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
+def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
     # invalid api key
     if (os.path.isfile(apiKeyPath) == False):
         print "Error " + apiKeyPath + " not found"
         return (-1, 0, 0), 0, 0 
     
-    # invalid city name quick n dirty check
-    if (len(cityName) > 0 and False == any(c.isalpha() for c in cityName)):
-        print "Error " + cityName + " is invalid city name"
-        return (-2, 0, 0), 0, 0
-    
     # create weather printer object
-    weatherCity = WeatherPrinter.WeatherCity(cityName, apiKeyPath)
+    # invalid zipcode quick n dirty check
+    if (zipcode < 500 or zipcode > 99999):
+        weatherCity = WeatherPrinter.WeatherCity(keyFile=apiKeyPath)
+    else:
+        weatherCity = WeatherPrinter.WeatherCity(zipcode, apiKeyPath)
     
     if (weatherCity.mParseCode != 0):
         print "Error code " + str(weatherCity.mParseCode) + " parsing weather info"
@@ -69,8 +67,8 @@ def usage():
     print "    -d                add description to image" 
     print ""
     print "   Weather options:"
-    print "    -w {city name}    turn on weather feature, must also use -k option"
-    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid," 
+    print "    -w {zipcode}      turn on weather feature, must also use -k option"
+    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid" 
     print "                           if -w isn't supplied, use current location"
     print "    -x {top left x}   topleft x pixel of weather info (optional)"
     print "    -y {top left y}   topleft y pixel of weather info (optional)"
@@ -83,7 +81,7 @@ def main():
     
     result = 0
     apiKeyPath = 0
-    weatherCityName = ''
+    weatherZipcode = 0
     imgPath = '/tmp/image.jpg'
     fontPath = 'DejaVuSans.ttf'
     addCaption = 0
@@ -114,7 +112,7 @@ def main():
         elif opt in ('-k'):
             apiKeyPath = arg
         elif opt in ('-w'):
-            weatherCityName = arg
+            weatherZipcode = int(arg)
         elif opt in ('-x'):
             weatherX = int(arg)
         elif opt in ('-y'):
@@ -175,9 +173,9 @@ def main():
     weatherWidth = weatherHeight = 0
     if (result == 0 and apiKeyPath != 0):
         if (weatherX >= 0 and weatherY >= 0):
-            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherCityName, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
+            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath, (weatherX, weatherY))
         else:
-            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherCityName, apiKeyPath, inputImg, fontPath)
+            (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
         
         if (result != 0):
             print 'Error code ' + str(result) + ' printing weather to ' + imgPath

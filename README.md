@@ -35,7 +35,7 @@ Usage: python ./bingwall.py OPTION [VALUE]
     -d                add description to image
 
    Weather options:
-    -w {city name}    turn on weather feature, must also use -k option
+    -w {zipcode}      turn on weather feature, must also use -k option
     -k {api.key path} path to api key file for http://openweathermap.org/appid,
                            if -w isn't supplied, use current location
     -x {top left x}   topleft x pixel of weather info (optional)

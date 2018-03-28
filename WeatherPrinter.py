@@ -23,8 +23,19 @@ def getApiKey(fileName = 'api.key'):
     else:
         return -1
 
+'''
+Struct that contains location lat & lon
+'''
+class _locationData:
+    def __init__(self):
+        self.lat = -200
+        self.lon = -200
+        
+    def isValid(self):
+        return (abs(self.lat) <= 180 and abs(self.lon) <= 180)
+
 class WeatherCity:
-    def __init__(self, cityName = '', keyFile = 'api.key'):
+    def __init__(self, zipCode = 0, keyFile = 'api.key'):
         '''
         All temps are in C
         '''
@@ -40,38 +51,48 @@ class WeatherCity:
         self.mSunSet = -1
         self.mHumid = -1
         self.mWindspeed = -1
+        self.mZipcodeLocation = _locationData()
+        self.mZipcode = str(zipCode)
         
         self.mApiKey = getApiKey(keyFile)
         
         if (self._isInternetOn() == False):
-            print "Error creating WeatherCity object for " + cityName + ": no internet connection"
+            print "Error creating WeatherCity object for " + self.mZipcode + ": no internet connection"
             return
 
-        # If city name is empty, try getting current location
+        # If zipCode is invalid, try getting current location
         #  this is provided by geocode service that tracks ip address
-        if (len(cityName) == 0):
+        if (self.mZipcode == '0'):
             locReq = urllib.urlopen('http://freegeoip.net/json')
             locData = json.loads(locReq.read())
-            cityName = locData['city']
+            self.mZipcodeLocation.lat = float(locData['latitude'])
+            self.mZipcodeLocation.lon = float(locData['longitude'])
+            self.mCityName = locData['city']
+            print json.dumps(locData, indent=4, sort_keys=True)
+        
+        else:
+            # use zippotamus api to get lat & lon for zipcode
+            zipcodeUrl = 'http://api.zippopotam.us/us/' + self.mZipcode
+            locReq = urllib.urlopen(zipcodeUrl)
+            locData = json.loads(locReq.read())
+            print json.dumps(locData, indent=4, sort_keys=True)
+            
+            self.mZipcodeLocation.lat = float(locData['places'][0]['latitude'])
+            self.mZipcodeLocation.lon = float(locData['places'][0]['longitude'])
+            self.mCityName = locData['places'][0]['place name']
+            
 
         if (self.mApiKey == -1):
-            print "Error creating WeatherCity object for " + cityName + ": invalid apikey file " + keyFile
+            print "Error creating WeatherCity object for " + self.mCityName + ": invalid apikey file " + keyFile
             return
         
-        # build api call
-        eligibleCitiName = cityName.replace("_", "%20")
-        eligibleCitiName = eligibleCitiName.replace(" ", "%20")
-        apiUrl = "http://api.openweathermap.org/data/2.5/weather?q=" + eligibleCitiName +  ",us&units=metric&appid=" + self.mApiKey
-        print "weather url " + apiUrl
-        
-        apiResponse = urllib2.urlopen(apiUrl)
-        resultJson = json.loads(apiResponse.read())
+        resultJson = self._getWeatherData() 
         # for debug purpose
         print json.dumps(resultJson, indent=4, sort_keys=True)
-                
-        parseResult = self.parseWeatherJson(resultJson)
+        
+        parseResult = self._parseWeatherJson(resultJson)
         if (0 != parseResult):
-            print "Error parsing WeatherCity object for " + cityName + " code " + str(parseResult)
+            print "Error parsing WeatherCity object for " + self.mCityName + " code " + str(parseResult)
             self._dumpInfo()
             return
         
@@ -232,7 +253,7 @@ class WeatherCity:
         print 'Weather icon url: ' + self.mIconUrl
         
     # parse to class member given json response of api    
-    def parseWeatherJson(self, jsonString):
+    def _parseWeatherJson(self, jsonString):
         self.mCityName = jsonString['name']
         self.mCurTemp = int(jsonString['main']['temp']) 
         self.mMaxTemp = int(jsonString['main']['temp_max'])
@@ -271,6 +292,54 @@ class WeatherCity:
         
         self.mParseCode = isGood        
         return isGood
+    
+    '''
+    Helper for getting api response back from openweather
+    '''
+    def _getJsonResponse(self, queryPart, urlName = "weather url"):
+        apiUrl = 'http://api.openweathermap.org/data/2.5/' + queryPart + "&units=metric&appid=" + self.mApiKey
+        print urlName + ' ' + apiUrl
+        apiResponse = urllib2.urlopen(apiUrl)
+        return json.loads(apiResponse.read())
+    
+    '''
+    Json weather data getter
+    '''
+    def _getWeatherData(self):
+        defaultQuery = "weather?zip=" + str(self.mZipcode)
+        
+        eligibleCitiName = self.mCityName.replace("_", "%20")
+        eligibleCitiName = eligibleCitiName.replace(" ", "%20")
+        
+        if (len(eligibleCitiName) == 0 or False == self.mZipcodeLocation.isValid()):
+            # easy way first, get direct response with zipcode
+            # usually inaccurate result
+            return self._getJsonResponse(defaultQuery)
+            
+        # Now to the hard part, let's get city id from cityName
+        # Find all city names here, will give a list of locations
+        cityQueryResponse = self._getJsonResponse("find?q=" + eligibleCitiName + ",us&type=accurate", "city finder")
+        if ('count' not in cityQueryResponse or 'list' not in cityQueryResponse):
+            print 'Error reading city query response, falling back to direct query'
+            return self._getJsonResponse(defaultQuery)
+         
+        # For each city in response, get the closest to mZipcodeLocation
+        goodCity = cityQueryResponse['list'][0]
+        curMinDist = 2*360*360
+        for cityItem in cityQueryResponse['list']:
+            lat = float(cityItem['coord']['lat'])
+            lon = float(cityItem['coord']['lon'])
+            goodLat = float(goodCity['coord']['lat'])
+            goodLon = float(goodCity['coord']['lon'])
+            
+            dist = (lat - goodLat)**2 + (lon - goodLon)**2
+            if (dist < curMinDist):
+                # Found better city
+                curMinDist = dist 
+                goodCity = cityItem
+         
+        # Now get the good city data
+        return self._getJsonResponse("weather?id=" + str(goodCity['id']))
     
     '''
     Main function of this class
@@ -327,19 +396,20 @@ class TestWeatherPrinter(unittest.TestCase):
             sys.exit(1)
 
     def test_info_success(self):        
-        losAngeles = WeatherCity("Los Angeles")
-        lagunaHills = WeatherCity("Laguna Hills")
+        losAngeles = WeatherCity(90089)
+        lagunaHills = WeatherCity(92653)
         self.assertEqual(losAngeles.mParseCode, 0)
         self.assertEqual(lagunaHills.mParseCode, 0)
         
         self.assertEqual(losAngeles.mCityName, 'Los Angeles')
-        self.assertEqual(lagunaHills.mCityName, 'Laguna Hills')        
+        self.assertEqual(lagunaHills.mCityName, 'Laguna Hills')
         
     # get current city info
     def test_get_current_city(self):
         curCity = WeatherCity()
         self.assertEqual(curCity.mParseCode, 0)
         self.assertGreater(len(curCity.mCityName), 0)
+        self.assert_(curCity.mZipcodeLocation.isValid())
         
     # this doesn't require bingwall
     def test_print_blankpicture(self):
@@ -349,7 +419,7 @@ class TestWeatherPrinter(unittest.TestCase):
         img.save(testImage)
         
         # get test weather info
-        losAngeles = WeatherCity('Los Angeles')
+        losAngeles = WeatherCity(90089)
         retVal, w, h = losAngeles.addWeatherToPhoto(testImage, fontSize=50)
         self.assertEqual(retVal, 0)
         self.assertGreater(w, 0)
@@ -366,7 +436,7 @@ class TestWeatherPrinter(unittest.TestCase):
         self.assertEqual(downloadSuccess, 0)
         
         # print weather info
-        losAngeles  = WeatherCity('Los Angeles')
+        losAngeles  = WeatherCity(90089)
         retVal, w, h = losAngeles.addWeatherToPhoto(testImage, fontSize=50)
         self.assertEqual(retVal, 0)
         self.assertGreater(w, 0)
