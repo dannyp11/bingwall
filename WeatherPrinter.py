@@ -19,7 +19,7 @@ def getApiKey(fileName = 'api.key'):
     if (os.path.isfile(fileName) == True):
         # return 1st line of fileName
         with open(fileName, 'r') as f:
-            return f.readline()
+            return f.readline().rstrip('\n')
     else:
         return -1
 
@@ -324,19 +324,22 @@ class WeatherCity:
             return self._getJsonResponse(defaultQuery)
          
         # For each city in response, get the closest to mZipcodeLocation
-        goodCity = cityQueryResponse['list'][0]
+        cityList = cityQueryResponse['list']
+        goodCity = cityList[0]
         curMinDist = 2*360*360
-        for cityItem in cityQueryResponse['list']:
+        for cityItem in cityList:
             lat = float(cityItem['coord']['lat'])
             lon = float(cityItem['coord']['lon'])
-            goodLat = float(goodCity['coord']['lat'])
-            goodLon = float(goodCity['coord']['lon'])
+            goodLat = self.mZipcodeLocation.lat
+            goodLon = self.mZipcodeLocation.lon
             
             dist = (lat - goodLat)**2 + (lon - goodLon)**2
             if (dist < curMinDist):
                 # Found better city
                 curMinDist = dist 
                 goodCity = cityItem
+        
+        print "Found best match city " + str(cityList.index(goodCity) + 1) + "/" + str(len(cityList))
          
         # Now get the good city data
         return self._getJsonResponse("weather?id=" + str(goodCity['id']))
