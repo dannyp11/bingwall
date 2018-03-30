@@ -86,7 +86,8 @@ class BingWallpaper(object):
         # load url
         webpage = ""
         try:
-            webpage = urllib2.urlopen(self.descriptionLink)
+            getRequest = urllib2.Request(self.descriptionLink, None, {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0'})
+            webpage = urllib2.urlopen(getRequest).read(200000)
         except urllib2.HTTPError:
             result = 1
         except urllib2.URLError:
@@ -96,25 +97,15 @@ class BingWallpaper(object):
             return result
         
         # convert data to bs format
-        bsData = BeautifulSoup(webpage.read().decode('utf-8'), 'lxml')
-        descSection = bsData.find('div', {'class': 'b_vPanel'})
+        bsData = BeautifulSoup(webpage.decode('utf-8'), 'lxml')
+        descSection = bsData.find('div', {'class': 'en_description'})
         if (descSection is None):
             return 3        
         
-        descSection = descSection.find('div')
-        if (descSection is None):
-            return 4
-        
-        # traverse thru div list
-        descSection = descSection.nextSibling
-        descSection = descSection.nextSibling
-        descSection = descSection.nextSibling
-        
         if (len(str(descSection)) > 30):
-            self.descriptionText = str(descSection.prettify().encode('unicode-escape')).decode('unicode-escape')
-            
-            # strip xml tag
-            self.descriptionText = re.sub('<[^>]*>', '', self.descriptionText)
+            for element in descSection:
+                self.descriptionText = element
+                break
             
             if (len(self.descriptionText) < 30):
                 result = 6
@@ -128,7 +119,7 @@ class BingWallpaper(object):
         dataFile.close()
         
         descFile = open('/tmp/descData.bing','w')
-        descFile.write(bsData.find('div', {'class': 'b_vPanel'}).prettify(encoding='utf-8'))
+        descFile.write(bsData.find('div', {'class': 'en_description'}).prettify(encoding='utf-8'))
         descFile.close()
         
         if (0 == result):
