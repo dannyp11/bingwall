@@ -98,7 +98,7 @@ class BingWallpaper(object):
         
         # convert data to bs format
         bsData = BeautifulSoup(webpage.decode('utf-8'), 'lxml')
-        descSection = bsData.find('div', {'class': 'en_description'})
+        descSection = bsData.find('div', {'class': 'ency_desc'})
         if (descSection is None):
             return 3        
         
@@ -119,7 +119,7 @@ class BingWallpaper(object):
         dataFile.close()
         
         descFile = open('/tmp/descData.bing','w')
-        descFile.write(bsData.find('div', {'class': 'en_description'}).prettify(encoding='utf-8'))
+        descFile.write(bsData.find('div', {'class': 'ency_desc'}).prettify(encoding='utf-8'))
         descFile.close()
         
         if (0 == result):
