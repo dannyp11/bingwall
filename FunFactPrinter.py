@@ -62,11 +62,11 @@ class FunFactPrinter:
         
         # prevent going further
         if (self.mParseCode != 0):
-            return -1
+            return -1, 0, 0
         
         # check photoPath exists
         if (os.path.isfile(photoPath) == False):
-            return -2
+            return -2, 0, 0
         
         # load image
         img = Image.open(photoPath).convert("RGBA")

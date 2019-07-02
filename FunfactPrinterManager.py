@@ -107,9 +107,9 @@ class FunFactManager():
         
         # get size of all facts
         retVal, thoughtW, thoughtH = self.mFunFactPrinter.printThought(photoPath, 0, 0, fontSizeThought, self.mFontPath, True)
-        retVal, ideaW, ideaH = self.mFunFactPrinter.printThought(photoPath, 0, 0, fontSizeIdea, self.mFontPath, True)
-        retVal, factW, factH = self.mFunFactPrinter.printThought(photoPath, 0, 0, fontSizeFact, self.mFontPath, True)
-        retVal, jokeW, jokeH = self.mFunFactPrinter.printThought(photoPath, 0, 0, fontSizeJoke, self.mFontPath, True)
+        retVal, ideaW, ideaH = self.mFunFactPrinter.printIdea(photoPath, 0, 0, fontSizeIdea, self.mFontPath, True)
+        retVal, factW, factH = self.mFunFactPrinter.printFact(photoPath, 0, 0, fontSizeFact, self.mFontPath, True)
+        retVal, jokeW, jokeH = self.mFunFactPrinter.printJoke(photoPath, 0, 0, fontSizeJoke, self.mFontPath, True)
     
         # print thought
         if (randint(0, 1)):
