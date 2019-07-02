@@ -160,7 +160,7 @@ class FunFactPrinter:
             return 3
         
         mainSection = mainSection.find_all('p')
-        if (mainSection is None):
+        if (len(mainSection) < 4):
             return 4
         
         result = -4
