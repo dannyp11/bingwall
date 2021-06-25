@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import urllib2
+import urllib.request, urllib.error
 import getopt, sys, os, shutil
 
 import WeatherPrinter, BingWallpaperDownloader
@@ -13,9 +13,9 @@ def isInternetOn():
     googleUrl = 'http://216.58.192.142'
 
     try:
-        urllib2.urlopen(googleUrl, timeout=1)
+        urllib.request.urlopen(googleUrl, timeout=1)
         return True
-    except urllib2.URLError: 
+    except urllib.error.URLError: 
         return False
 
 '''
@@ -33,10 +33,11 @@ return  retVal, width, height, x, y of weather box
           -1 on invalid key
           -3 on fail getting weather info
 '''
-def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
+def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, xxx_todo_changeme = (1450,200)):
     # invalid api key
+    (x,y) = xxx_todo_changeme
     if (os.path.isfile(apiKeyPath) == False):
-        print "Error " + apiKeyPath + " not found"
+        print(("Error " + apiKeyPath + " not found"))
         return (-1, 0, 0), 0, 0 
     
     # create weather printer object
@@ -47,7 +48,7 @@ def WeatherAdder(zipcode, apiKeyPath, photoPath, fontPath, (x,y) = (1450,200)):
         weatherCity = WeatherPrinter.WeatherCity(zipcode, apiKeyPath)
     
     if (weatherCity.mParseCode != 0):
-        print "Error code " + str(weatherCity.mParseCode) + " parsing weather info"
+        print(("Error code " + str(weatherCity.mParseCode) + " parsing weather info"))
         return (-3, 0, 0), 0, 0
     
     return weatherCity.addWeatherToPhoto(photoPath, x, y, 40, fontPath), x, y
@@ -57,25 +58,25 @@ fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 addDescription = 0
 offsetPix = 0
 def usage():
-    print "Usage: python " + (sys.argv[0]) + " OPTION [VALUE]"
-    print "   Common options:"
-    print "    -p {path}         where to save the image, default " + imgPath
-    print "    -f {fontPath}     path to text font for everything, default " + fontPath
-    print ""
-    print "   Photo of the day options:"
-    print "    -c                add caption to image" 
-    print "    -d                add description to image" 
-    print ""
-    print "   Weather options:"
-    print "    -w {zipcode}      turn on weather feature, must also use -k option"
-    print "    -k {api.key path} path to api key file for http://openweathermap.org/appid" 
-    print "                           if -w isn't supplied, use current location"
-    print "    -x {top left x}   topleft x pixel of weather info (optional)"
-    print "    -y {top left y}   topleft y pixel of weather info (optional)"
-    print "    -o {offset}       offset pixels from bottom for caption/description, default: " + str(offsetPix)
-    print ""
-    print "   Fun X of the day options:"
-    print "    -a {mode}         optional fun fact/joke/quote/idea of the day to image, mode: 0(text box), 1(scatter)"
+    print(("Usage: python " + (sys.argv[0]) + " OPTION [VALUE]"))
+    print("   Common options:")
+    print(("    -p {path}         where to save the image, default " + imgPath))
+    print(("    -f {fontPath}     path to text font for everything, default " + fontPath))
+    print("")
+    print("   Photo of the day options:")
+    print("    -c                add caption to image") 
+    print("    -d                add description to image") 
+    print("")
+    print("   Weather options:")
+    print("    -w {zipcode}      turn on weather feature, must also use -k option")
+    print("    -k {api.key path} path to api key file for http://openweathermap.org/appid") 
+    print("                           if -w isn't supplied, use current location")
+    print("    -x {top left x}   topleft x pixel of weather info (optional)")
+    print("    -y {top left y}   topleft y pixel of weather info (optional)")
+    print(("    -o {offset}       offset pixels from bottom for caption/description, default: " + str(offsetPix)))
+    print("")
+    print("   Fun X of the day options:")
+    print("    -a {mode}         optional fun fact/joke/quote/idea of the day to image, mode: 0(text box), 1(scatter)")
 
 def main():    
     
@@ -126,31 +127,31 @@ def main():
             
     # check internet
     if (isInternetOn() == False):
-        print "Internet is off"
+        print("Internet is off")
         return 1
     
     # build wallpaperDownloader object
     wallpaper = BingWallpaperDownloader.BingWallpaper(imgPath, fontPath)
     if (0 != wallpaper.dlResultCode):
-        print 'Error code ' + str(wallpaper.dlResultCode) + ' getting wallpaper' 
+        print(('Error code ' + str(wallpaper.dlResultCode) + ' getting wallpaper')) 
         return 2
     
     # build fun fact mgr object
     funFactMgr = FunFactManager(funFactMode, fontPath)
     if (0 != funFactMgr.mResultCode and funFactMode != FunFactMode.OFF):
-        print 'Error code ' + str(funFactMgr.mResultCode) + ' initing funfact manager'
+        print(('Error code ' + str(funFactMgr.mResultCode) + ' initing funfact manager'))
     
     # add description to image        
     if (addDescription == 1):        
         resultDesc = wallpaper.ParseDescription()
         if (0 != resultDesc):
-            print 'Error code ' + str(resultDesc) + ' parsing description'
+            print(('Error code ' + str(resultDesc) + ' parsing description'))
     
     # add caption to image
     if (addCaption == 1):
         result = wallpaper.ParseCaption()
         if (0 != result):
-            print 'Error code ' + str(resultDesc) + ' parsing caption'
+            print(('Error code ' + str(resultDesc) + ' parsing caption'))
             # we return because caption is a must-ok for bing image
             return result
     
@@ -167,7 +168,7 @@ def main():
         # update fun fact manager obstacle set
         funFactMgr.addObstacleBox((0, 1080 - y_description, 1920, y_description))
     else:
-        print "Error: can't export image " + str(outputImg)                                        
+        print(("Error: can't export image " + str(outputImg)))                                        
     
     # add weather info
     weatherWidth = weatherHeight = 0
@@ -178,7 +179,7 @@ def main():
             (result, weatherWidth, weatherHeight), weatherX, weatherY = WeatherAdder(weatherZipcode, apiKeyPath, inputImg, fontPath)
         
         if (result != 0):
-            print 'Error code ' + str(result) + ' printing weather to ' + imgPath
+            print(('Error code ' + str(result) + ' printing weather to ' + imgPath))
         else:
             # update fun fact manager obstacle set
             funFactMgr.addObstacleBox((weatherX, weatherY, weatherWidth, weatherHeight))
@@ -191,18 +192,18 @@ def main():
         # print data
         result = funFactMgr.exportToImage(imgPath)
         if (0 != result):
-            print 'Error code ' + str(result) + ' exporting funfact to ' + imgPath
+            print(('Error code ' + str(result) + ' exporting funfact to ' + imgPath))
             result = 0 # still process even though fun fact parser fails
     
     # make sure img is there
     if (False == os.path.isfile(imgPath)):
-        print 'Error: final image ' + imgPath + ' not exists'
+        print(('Error: final image ' + imgPath + ' not exists'))
         result = -1
     
     if (result == 0):
-        print "Successfully saved " + imgPath
+        print(("Successfully saved " + imgPath))
     else:
-        print "Error code " + str(result)
+        print(("Error code " + str(result)))
         
     return result
 

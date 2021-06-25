@@ -6,7 +6,7 @@ Created on Jun 27, 2017
 
 import os.path, sys, time
 import unittest
-import urllib2, json, urllib
+import urllib.request, urllib.error, urllib.parse, json, urllib.request, urllib.parse, urllib.error
 
 from PIL import ImageFont, Image, ImageDraw
 
@@ -57,25 +57,25 @@ class WeatherCity:
         self.mApiKey = getApiKey(keyFile)
         
         if (self._isInternetOn() == False):
-            print "Error creating WeatherCity object for " + self.mZipcode + ": no internet connection"
+            print("Error creating WeatherCity object for " + self.mZipcode + ": no internet connection")
             return
 
         # If zipCode is invalid, try getting current location
         #  this is provided by geocode service that tracks ip address
         if (self.mZipcode == '0'):
-            locReq = urllib.urlopen('http://freegeoip.net/json')
+            locReq = urllib.request.urlopen('http://freegeoip.net/json')
             locData = json.loads(locReq.read())
             self.mZipcodeLocation.lat = float(locData['latitude'])
             self.mZipcodeLocation.lon = float(locData['longitude'])
             self.mCityName = locData['city']
-            print json.dumps(locData, indent=4, sort_keys=True)
+            print(json.dumps(locData, indent=4, sort_keys=True))
         
         else:
             # use zippotamus api to get lat & lon for zipcode
             zipcodeUrl = 'http://api.zippopotam.us/us/' + self.mZipcode
-            locReq = urllib.urlopen(zipcodeUrl)
+            locReq = urllib.request.urlopen(zipcodeUrl)
             locData = json.loads(locReq.read())
-            print json.dumps(locData, indent=4, sort_keys=True)
+            print(json.dumps(locData, indent=4, sort_keys=True))
             
             self.mZipcodeLocation.lat = float(locData['places'][0]['latitude'])
             self.mZipcodeLocation.lon = float(locData['places'][0]['longitude'])
@@ -83,16 +83,16 @@ class WeatherCity:
             
 
         if (self.mApiKey == -1):
-            print "Error creating WeatherCity object for " + self.mCityName + ": invalid apikey file " + keyFile
+            print("Error creating WeatherCity object for " + self.mCityName + ": invalid apikey file " + keyFile)
             return
         
         resultJson = self._getWeatherData() 
         # for debug purpose
-        print json.dumps(resultJson, indent=4, sort_keys=True)
+        print(json.dumps(resultJson, indent=4, sort_keys=True))
         
         parseResult = self._parseWeatherJson(resultJson)
         if (0 != parseResult):
-            print "Error parsing WeatherCity object for " + self.mCityName + " code " + str(parseResult)
+            print("Error parsing WeatherCity object for " + self.mCityName + " code " + str(parseResult))
             self._dumpInfo()
             return
         
@@ -103,9 +103,9 @@ class WeatherCity:
         googleUrl = 'http://216.58.192.142'
     
         try:
-            urllib2.urlopen(googleUrl, timeout=1)
+            urllib.request.urlopen(googleUrl, timeout=1)
             return True
-        except urllib2.URLError: 
+        except urllib.error.URLError: 
             return False
         
     '''
@@ -151,7 +151,7 @@ class WeatherCity:
         iconPath = photoPath + '.png'
         iconW = iconH = 0
         
-        urllib.urlretrieve(self.mIconUrl, iconPath)        
+        urllib.request.urlretrieve(self.mIconUrl, iconPath)        
         if (os.path.isfile(iconPath)):                        
             # paste icon to draw
             iconImg = Image.open(iconPath)                 
@@ -185,10 +185,11 @@ class WeatherCity:
     return    retVal = 0 if success
             resX, resY : x ,y of bottom right pixel of text box, useful for calculating background box
     '''
-    def _printAllText(self, draw, img, (x,y), photoPath, fontSize = 30, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
+    def _printAllText(self, draw, img, xxx_todo_changeme, photoPath, fontSize = 30, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
         
+        (x,y) = xxx_todo_changeme
         curTempFontSize = fontSize
-        otherTempFontSize = fontSize / 2
+        otherTempFontSize = int(fontSize / 2)
         
         _column1 = x # city name, rain/snow...
         _column2 = _column1 + 100 # icon, temp
@@ -222,7 +223,7 @@ class WeatherCity:
         if (_column2 < col1MaxX + 50): _column2 = col1MaxX + 50
         
         #  print cur temp         
-        draw, resX, resY = self._drawText(str(self.mCurTemp) + u'\N{DEGREE SIGN}' + 'C', fontCurTemp, draw, _column2, y)
+        draw, resX, resY = self._drawText(str(self.mCurTemp) + '\N{DEGREE SIGN}' + 'C', fontCurTemp, draw, _column2, y)
         
         #  paste weather icon
         img, resX, iconY = self._pasteWeatherIcon(photoPath, img, _column2, resY + 20)
@@ -244,13 +245,13 @@ class WeatherCity:
         
     # dump object data
     def _dumpInfo(self):
-        print 'City: ' + self.mCityName
-        print 'Temp: ' + str(self.mMinTemp) + '/' + str(self.mCurTemp) + '/' + str(self.mMaxTemp)
-        print 'Humid: ' + str(self.mHumid)
-        print 'Desc: ' + self.mWeatherDescription
-        print 'Sunrise: ' + self.mSunRise
-        print 'Sunset: ' + self.mSunSet
-        print 'Weather icon url: ' + self.mIconUrl
+        print('City: ' + self.mCityName)
+        print('Temp: ' + str(self.mMinTemp) + '/' + str(self.mCurTemp) + '/' + str(self.mMaxTemp))
+        print('Humid: ' + str(self.mHumid))
+        print('Desc: ' + self.mWeatherDescription)
+        print('Sunrise: ' + self.mSunRise)
+        print('Sunset: ' + self.mSunSet)
+        print('Weather icon url: ' + self.mIconUrl)
         
     # parse to class member given json response of api    
     def _parseWeatherJson(self, jsonString):
@@ -286,7 +287,7 @@ class WeatherCity:
         
         # check if icon url is alive        
         try:
-            urllib2.urlopen(self.mIconUrl)
+            urllib.request.urlopen(self.mIconUrl)
         except Exception:
             isGood += 32
         
@@ -298,8 +299,8 @@ class WeatherCity:
     '''
     def _getJsonResponse(self, queryPart, urlName = "weather url"):
         apiUrl = 'http://api.openweathermap.org/data/2.5/' + queryPart + "&units=metric&appid=" + self.mApiKey
-        print urlName + ' ' + apiUrl
-        apiResponse = urllib2.urlopen(apiUrl)
+        print(urlName + ' ' + apiUrl)
+        apiResponse = urllib.request.urlopen(apiUrl)
         return json.loads(apiResponse.read())
     
     '''
@@ -320,7 +321,7 @@ class WeatherCity:
         # Find all city names here, will give a list of locations
         cityQueryResponse = self._getJsonResponse("find?q=" + eligibleCitiName + ",us&type=accurate", "city finder")
         if ('count' not in cityQueryResponse or 'list' not in cityQueryResponse):
-            print 'Error reading city query response, falling back to direct query'
+            print('Error reading city query response, falling back to direct query')
             return self._getJsonResponse(defaultQuery)
          
         # For each city in response, get the closest to mZipcodeLocation
@@ -339,7 +340,7 @@ class WeatherCity:
                 curMinDist = dist 
                 goodCity = cityItem
         
-        print "Found best match city " + str(cityList.index(goodCity) + 1) + "/" + str(len(cityList))
+        print("Found best match city " + str(cityList.index(goodCity) + 1) + "/" + str(len(cityList)))
          
         # Now get the good city data
         return self._getJsonResponse("weather?id=" + str(goodCity['id']))
@@ -393,9 +394,9 @@ class TestWeatherPrinter(unittest.TestCase):
         apiKeyFile = 'api.key'
         
         if (os.path.isfile(apiKeyFile) != True):
-            print " Error: " + apiKeyFile + " not exists"
-            print " Perhaps you may need to register a free key with https://openweathermap.org/price"
-            print " and put the key inside " + apiKeyFile + " file on the same directory as this unit test script"
+            print(" Error: " + apiKeyFile + " not exists")
+            print(" Perhaps you may need to register a free key with https://openweathermap.org/price")
+            print(" and put the key inside " + apiKeyFile + " file on the same directory as this unit test script")
             sys.exit(1)
 
     def test_info_success(self):        
@@ -412,7 +413,7 @@ class TestWeatherPrinter(unittest.TestCase):
         curCity = WeatherCity()
         self.assertEqual(curCity.mParseCode, 0)
         self.assertGreater(len(curCity.mCityName), 0)
-        self.assert_(curCity.mZipcodeLocation.isValid())
+        self.assertTrue(curCity.mZipcodeLocation.isValid())
         
     # this doesn't require bingwall
     def test_print_blankpicture(self):
@@ -444,7 +445,7 @@ class TestWeatherPrinter(unittest.TestCase):
         self.assertEqual(retVal, 0)
         self.assertGreater(w, 0)
         self.assertGreater(h, 0)
-        print "Check out weather info in " + testImage
+        print("Check out weather info in " + testImage)
     
 if __name__ == '__main__':
     unittest.main()

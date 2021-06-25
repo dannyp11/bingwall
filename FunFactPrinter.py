@@ -20,10 +20,10 @@ class FunFactPrinter:
     '''
     def dumpInfo(self):
         printable = set(string.printable) # for logging compatibility
-        print 'Thought: ' + filter(lambda x: x in printable, self.mThought)
-        print 'Idea: ' + filter(lambda x: x in printable, self.mIdea)
-        print 'Joke: ' + filter(lambda x: x in printable, self.mJoke)
-        print 'Fact: ' + filter(lambda x: x in printable, self.mFact )   
+        print('Thought: ' + [x for x in self.mThought if x in printable])
+        print('Idea: ' + [x for x in self.mIdea if x in printable])
+        print('Joke: ' + [x for x in self.mJoke if x in printable])
+        print('Fact: ' + [x for x in self.mFact if x in printable])   
     
     '''
     Print thought of the day
@@ -147,7 +147,7 @@ class FunFactPrinter:
         try:
             webpage = requests.get(webUrl, headers=headers, verify=False)
         except requests.exceptions.HTTPError as err:
-            print 'Error downloading data ' + str(err)
+            print('Error downloading data ' + str(err))
             result = 1
         
         if (result != 0):
@@ -189,6 +189,7 @@ class FunFactPrinter:
         return result
 
     def _parseMainSectionModule(self, section):
+        print("sec %s" % section)
         key = ''
         if (len(str(section)) > 10):
             key = str(section.encode('unicode-escape')).decode('unicode-escape')
@@ -237,8 +238,9 @@ class FunFactPrinter:
     return    retVal = 0 if success
             resX, resY : x ,y of bottom right pixel of text box, useful for calculating background box
     '''
-    def _printAllText(self, draw, (x,y), fontSize = 30, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
+    def _printAllText(self, draw, xxx_todo_changeme, fontSize = 30, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
         # open image & setup font
+        (x,y) = xxx_todo_changeme
         fontText = ImageFont.truetype(fontPath, fontSize)
         
         maxX = x
@@ -280,7 +282,7 @@ class TestFunFact(unittest.TestCase):
         img.save(testImage)
         
         # print to img
-        self.assertEquals(funFact.printAllToPhoto(testImage, x=100, y=100, fontSize=20)[0], 0)
+        self.assertEqual(funFact.printAllToPhoto(testImage, x=100, y=100, fontSize=20)[0], 0)
         
     def test_print_single_to_photo(self):
         funFact = FunFactPrinter()
@@ -295,7 +297,7 @@ class TestFunFact(unittest.TestCase):
         x = 50
         y = 50
         retVal, resX, resY = funFact.printThought(testImage, x, y)
-        self.assertEquals(retVal, 0)
+        self.assertEqual(retVal, 0)
         self.assertGreater(resX, x)
         self.assertGreater(resY, y)
         
@@ -303,7 +305,7 @@ class TestFunFact(unittest.TestCase):
         x = 50
         y = 2*y
         retVal, resX, resY = funFact.printIdea(testImage, x, y)
-        self.assertEquals(retVal, 0)
+        self.assertEqual(retVal, 0)
         self.assertGreater(resX, x)
         self.assertGreater(resY, y)
         
@@ -311,7 +313,7 @@ class TestFunFact(unittest.TestCase):
         x = 50
         y = 2*y
         retVal, resX, resY = funFact.printJoke(testImage, x, y)
-        self.assertEquals(retVal, 0)
+        self.assertEqual(retVal, 0)
         self.assertGreater(resX, x)
         self.assertGreater(resY, y)
         
@@ -319,7 +321,7 @@ class TestFunFact(unittest.TestCase):
         x = 50
         y = 2*y
         retVal, resX, resY = funFact.printFact(testImage, x, y)
-        self.assertEquals(retVal, 0)
+        self.assertEqual(retVal, 0)
         self.assertGreater(resX, x)
         self.assertGreater(resY, y)
 if __name__ == '__main__':

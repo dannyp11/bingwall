@@ -1,6 +1,6 @@
 import os.path
 import unittest, textwrap
-import urllib2, urllib
+import urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error
 
 from PIL import ImageFont, Image, ImageDraw
 
@@ -103,14 +103,14 @@ class PhotoProcessor:
         
         # try to download image
         try:
-            urllib2.urlopen(self.photoUrl)
-        except urllib2.HTTPError:
+            urllib.request.urlopen(self.photoUrl)
+        except urllib.error.HTTPError:
             ++retVal
-        except urllib2.URLError:
+        except urllib.error.URLError:
             ++retVal
         
         if (0 == retVal):
-            urllib.urlretrieve(self.photoUrl, self.imgPath)
+            urllib.request.urlretrieve(self.photoUrl, self.imgPath)
             # imgPath has to exist from here now
             if (os.path.isfile(self.imgPath) == 0):
                 ++retVal          

@@ -5,7 +5,7 @@ Created on Aug 6, 2017
 '''
 
 import unittest
-import urllib2, json, urllib
+import urllib.request, urllib.error, urllib.parse, json, urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import re
 
@@ -47,7 +47,7 @@ class BingWallpaper(object):
         retVal = 0
         
         # get json from bing api
-        response = urllib.urlopen(self.url)        
+        response = urllib.request.urlopen(self.url)        
         data = json.loads(response.read())
         imgLink = "http://bing.com" +  data["images"][0]["url"]
         
@@ -60,7 +60,7 @@ class BingWallpaper(object):
         retVal += self.photoProcessor.dlResultCode       
         
         # for debug purpose
-        print json.dumps(data, indent=4, sort_keys=True)
+        print(json.dumps(data, indent=4, sort_keys=True))
         
         return retVal
     
@@ -86,11 +86,11 @@ class BingWallpaper(object):
         # load url
         webpage = ""
         try:
-            getRequest = urllib2.Request(self.descriptionLink, None, {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0'})
-            webpage = urllib2.urlopen(getRequest).read(200000)
-        except urllib2.HTTPError:
+            getRequest = urllib.request.Request(self.descriptionLink, None, {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0'})
+            webpage = urllib.request.urlopen(getRequest).read(200000)
+        except urllib.error.HTTPError:
             result = 1
-        except urllib2.URLError:
+        except urllib.error.URLError:
             result = 2
         
         if (result != 0):

@@ -1,7 +1,6 @@
 import unittest, os.path, string
 from enum import IntEnum
 from random import randint
-from sets import Set
 from PIL import Image
 
 from FunFactPrinter import FunFactPrinter
@@ -26,7 +25,7 @@ class FunFactManager():
     def __init__(self, funfactMode, fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
         self.mFontPath = fontPath
         self.mFactMode = funfactMode
-        self.mExistingBoxes = Set([])
+        self.mExistingBoxes = set()
         self.mFunFactPrinter = 0
         self.mResultCode = -1
         if (FunFactMode.OFF != funfactMode):
@@ -43,12 +42,12 @@ class FunFactManager():
     def _initialize(self):
         # init funfact object
         if (0 != self.mFunFactPrinter.mParseCode):
-            print 'Error code ' + str(self.mFunFactPrinter.mParseCode) + ' printing textbox fun fact'
+            print('Error code ' + str(self.mFunFactPrinter.mParseCode) + ' printing textbox fun fact')
             return -2
         
         # make sure mode is valid
         if (self.mFactMode < 0 or self.mFactMode >= len(FunFactMode)):
-            print 'Invalid fact mode ' + str(self.mFactMode)
+            print('Invalid fact mode ' + str(self.mFactMode))
             return -3
         
         return 0
@@ -58,7 +57,9 @@ class FunFactManager():
     Input: (box1), (box2)
             box info: top left x/y and width, height
     '''
-    def _isBoxIntersect(self, (x1, y1, w1, h1), (x2, y2, w2, h2)):
+    def _isBoxIntersect(self, xxx_todo_changeme, xxx_todo_changeme1):
+        (x1, y1, w1, h1) = xxx_todo_changeme
+        (x2, y2, w2, h2) = xxx_todo_changeme1
         retVal = True
         
         maxX1 = x1 + w1
@@ -79,12 +80,12 @@ class FunFactManager():
     def _printTextBoxMode(self, photoPath):
         retVal, boxW, boxH = self.mFunFactPrinter.printAllToPhoto(photoPath, 0, 0, 25, self.mFontPath, dryRun=True)
         if (retVal != 0):
-            print 'Error code ' + str(retVal) + ' geting size textbox fun fact'
+            print('Error code ' + str(retVal) + ' geting size textbox fun fact')
         
         boxX, boxY = self._getEligibleBox((boxW, boxH))
         if (boxX < 0 or boxY < 0):
             retVal = -1
-            print 'Error getting position of text box'
+            print('Error getting position of text box')
         else:
             retVal, tmpW, tmpH = self.mFunFactPrinter.printAllToPhoto(photoPath, boxX, boxY, 25, self.mFontPath, dryRun=False)
             
@@ -160,7 +161,8 @@ class FunFactManager():
     Output: x,y of eligible box
             x = y = -1 on error generating, usually out of luck
     '''
-    def _getEligibleBox(self, (width, height)):
+    def _getEligibleBox(self, xxx_todo_changeme2):
+        (width, height) = xxx_todo_changeme2
         resultX = resultY = -1
         
         minX = 10
@@ -197,7 +199,8 @@ class FunFactManager():
     Public function: add box that the text should avoid
     input: top left x, y, width, height
     '''
-    def addObstacleBox(self, (x, y, w, h)):
+    def addObstacleBox(self, xxx_todo_changeme3):
+        (x, y, w, h) = xxx_todo_changeme3
         self.mExistingBoxes.add((x, y, w, h))
 
     '''
@@ -226,10 +229,10 @@ class FunFactManager():
     '''
     def dumpInfo(self):
         self.mFunFactPrinter.dumpInfo()
-        print 'Fact mode: ' + str(self.mFactMode)
+        print('Fact mode: ' + str(self.mFactMode))
         
         for box in self.mExistingBoxes:
-            print ' Obstacle ' + str(box[0]) + ' ' + str(box[1]) + ' ' + str(box[2]) + ' ' + str(box[3])
+            print(' Obstacle ' + str(box[0]) + ' ' + str(box[1]) + ' ' + str(box[2]) + ' ' + str(box[3]))
         
 ##########################################################################
 # unit test area
