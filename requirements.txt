@@ -1,5 +1,5 @@
 olefile==0.44
-Pillow==8.1.1
+Pillow==9.0.0
 lxml==4.6.3
 beautifulsoup4==4.6.0
 requests==2.20.0
